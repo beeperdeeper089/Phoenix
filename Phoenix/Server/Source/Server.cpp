@@ -38,6 +38,43 @@
 
 using namespace phx::server;
 
+void registerIntegralAPI(phx::cms::ModManager* manager)
+{
+	manager->registerFunction("core.print", [](const std::string& text) {
+		LOG_INFO("MODULE") << text;
+	});
+	manager->registerFunction("core.log_warning", [](std::string message) {
+		LOG_WARNING("MODULE") << message;
+	});
+	manager->registerFunction("core.log_fatal", [](std::string message) {
+		LOG_FATAL("MODULE") << message;
+	});
+	manager->registerFunction("core.log_info", [](std::string message) {
+		LOG_INFO("MODULE") << message;
+	});
+	manager->registerFunction("core.log_debug", [](std::string message) {
+		LOG_DEBUG("MODULE") << message;
+	});
+}
+
+void registerUnusedAPI(phx::cms::ModManager* manager)
+{
+	manager->registerFunction("core.input.registerInput",
+	                          [](std::string uniqueName,
+	                             std::string displayName,
+	                             std::string defaultKey) {});
+	manager->registerFunction("core.input.getInput", [](int input) {});
+	manager->registerFunction("core.input.getInputRef",
+	                          [](std::string uniqueName) {});
+	manager->registerFunction("core.input.registerCallback",
+	                          [](int input, sol::function f) {});
+	manager->registerFunction(
+	    "audio.loadMP3",
+	    [=](const std::string& uniqueName, const std::string& filePath) {});
+	manager->registerFunction("audio.play", [=](sol::table source) {});
+}
+
+
 Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
     : m_arguments(cliArguments)
 {
@@ -81,24 +118,16 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 	// we're not doing anything with the settings variable, but we don't
 	// actually use it yet so just let it be.
 	m_save = Save(m_arguments["save"], modList);
-}
 
-// void registerUnusedAPI(cms::ModManager* manager)
-//{
-//	manager->registerFunction("core.input.registerInput",
-//	                          [](std::string uniqueName,
-//	                             std::string displayName,
-//	                             std::string defaultKey) {});
-//	manager->registerFunction("core.input.getInput", [](int input) {});
-//	manager->registerFunction("core.input.getInputRef",
-//	                          [](std::string uniqueName) {});
-//	manager->registerFunction("core.input.registerCallback",
-//	                          [](int input, sol::function f) {});
-//	manager->registerFunction(
-//	    "audio.loadMP3",
-//	    [=](const std::string& uniqueName, const std::string& filePath) {});
-//	manager->registerFunction("audio.play", [=](sol::table source) {});
-//}
+	Settings::get()->registerAPI(&m_modManager);
+	m_blockRegistry.registerAPI(&m_modManager);
+	registerIntegralAPI(&m_modManager);
+	registerUnusedAPI(&m_modManager);
+
+	// the server doesn't really care about progress, we'll just ignore it.
+	float progress = 0;
+	m_modManager.load(m_save.getModList(), {"Modules"}, &progress);
+}
 
 void Server::run() {}
 

@@ -49,17 +49,24 @@ static void CustomPanicHandler(sol::optional<std::string> maybe_msg)
 	                     << "The application will now be aborted.";
 }
 
-ModManager::ModManager(const ModList& toLoad, const ModList& paths)
-    : m_modsRequired(toLoad), m_modPaths(paths)
+ModManager::ModManager()
 {
 	m_luaState.open_libraries(sol::lib::base);
 	m_luaState.set_panic(
 	    sol::c_call<decltype(&CustomPanicHandler), &CustomPanicHandler>);
 }
 
-ModManager::Status ModManager::load(float* progress)
+ModManager::Status ModManager::load(const ModList& toLoad, const ModList& paths, float* progress)
 {
-	std::queue<Mod> toLoad;
+	m_modsRequired = toLoad;
+	m_modPaths     = paths;
+	
+	std::queue<Mod> loadOrder;
+
+	*progress = 0.f;
+
+	// we make 10% of the mod loading system finding the mods.
+	float progressInterval = 0.1f / static_cast<float>(m_modsRequired.size());
 
 	for (auto& require : m_modsRequired)
 	{
@@ -70,14 +77,24 @@ ModManager::Status ModManager::load(float* progress)
 			file.open(path + "/" + require + "/Init.lua");
 			if (file.is_open())
 			{
+				// the mod is found, break out of the loop and a bit to the
+				// progress.
+				
 				found = true;
-				toLoad.emplace(require, path);
+				loadOrder.emplace(require, path);
+
+				*progress += progressInterval;
+
 				break;
 			}
+
 		}
 
 		if (!found)
 		{
+			// the mod was not found in ANY of the directories.
+			
+			// make a list of the paths in a string.
 			std::string pathList = "\n\t";
 			for (auto& path : m_modPaths)
 			{
@@ -94,17 +111,20 @@ ModManager::Status ModManager::load(float* progress)
 		}
 	}
 
+	// we make 90% of the mod loading actually... loading the mods.
+	progressInterval = 0.9f / static_cast<float>(m_modsRequired.size());
+	
 	std::vector<std::string> loadedMods;
-	while (!toLoad.empty())
+	while (!loadOrder.empty())
 	{
-		std::size_t lastPass = toLoad.size();
+		std::size_t lastPass = loadOrder.size();
 
-		for (std::size_t i = 0; i < toLoad.size(); ++i)
+		for (std::size_t i = 0; i < loadOrder.size(); ++i)
 		{
-			Mod& mod       = toLoad.front();
+			Mod& mod       = loadOrder.front();
 			bool satisfied = true;
 
-			for (auto& dependency : mod.getDependencies())
+			for (const auto& dependency : mod.getDependencies())
 			{
 				if (std::find(loadedMods.begin(), loadedMods.end(),
 				              dependency) == loadedMods.end())
@@ -115,12 +135,11 @@ ModManager::Status ModManager::load(float* progress)
 
 			if (satisfied)
 			{
+				// all the dependencies are satisfied, lets load the mod.
 				m_currentModPath = mod.getPath() + "/" + mod.getName() + "/";
 				sol::protected_function_result pfr =
 				    m_luaState.safe_script_file(m_currentModPath + "Init.lua",
 				                                &sol::script_pass_on_error);
-
-				loadedMods.push_back(mod.getName());
 
 				// error occured if return is not valid.
 				if (!pfr.valid())
@@ -136,19 +155,25 @@ ModManager::Status ModManager::load(float* progress)
 
 					return {false, errString};
 				}
+
+				loadedMods.push_back(mod.getName());
+				*progress += progressInterval;
 			}
 			else
 			{
-				toLoad.push(toLoad.front());
+				loadOrder.push(loadOrder.front());
 			}
 
-			toLoad.pop();
+			// remove the front mod, since if it's loaded, it doesn't need to
+			// exist, and if it still needs dependencies, it will have been
+			// pushed to the back.
+			loadOrder.pop();
 		}
 
-		if (lastPass == toLoad.size())
+		if (lastPass == loadOrder.size())
 		{
 			std::string err = "The mod: ";
-			err += toLoad.front().getName();
+			err += loadOrder.front().getName();
 			err += " is missing one or more dependencies, please resolve this "
 			       "issue before continuing.";
 
@@ -158,6 +183,9 @@ ModManager::Status ModManager::load(float* progress)
 		}
 	}
 
+	// rounding might be a bitch, so lets explicitly set progress to 1.
+	*progress = 1.f;
+	
 	// no need to put in something for "what", since nothing went wrong.
 	return {true};
 }

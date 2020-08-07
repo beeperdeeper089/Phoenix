@@ -29,6 +29,8 @@
 #pragma once
 
 #include <Common/Save.hpp>
+#include <Server/Voxels/BlockRegistry.hpp>
+#include <Common/CMS/ModManager.hpp>
 
 #include <unordered_map>
 #include <string>
@@ -65,9 +67,21 @@ namespace phx::server
 		 */
 		Save m_save;
 
+		/**
+		 * @brief The mod loader/handler.
+		 *
+		 * This needs to be above anything that stores anything to do with lua
+		 * (even a sol::function) since the order of destruction means that
+		 * those will be destroyed before the state is.
+		 */
+		cms::ModManager m_modManager;
 
-		/// @brief The Server's block registry.
-		//BlockRegistry m_blockRegistry;
+		/**
+		 * @brief The block registry the server will append to.
+		 */
+		BlockRegistry m_blockRegistry;
+
+
 		
 		/// @brief An EnTT registry to store various data in
 		//entt::registry m_registry;
@@ -81,8 +95,6 @@ namespace phx::server
 		 */
 		//Game* m_game;
 
-		/// @brief The mod manager providing LUA API functionality
-		//cms::ModManager* m_modManager;
 
 	};
 } // namespace phx::server
