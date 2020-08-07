@@ -42,8 +42,8 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
     : m_arguments(cliArguments)
 {
 	// Load Settings.
-	const auto configInterator = m_arguments.find("config");
-	if (configInterator == m_arguments.end())
+	const auto configIterator = m_arguments.find("config");
+	if (configIterator == m_arguments.end())
 	{
 		m_arguments["config"] = "Settings.json";
 	}
@@ -51,9 +51,10 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 	Settings::get()->load(m_arguments["config"]);
 
 	// Initialize Logger.
-	auto logVerb = Settings::get()->add("Log Verbosity", "core:log_verbosity",
-	                     static_cast<int>(LogVerbosity::INFO));
-	
+	const auto* logVerb =
+	    Settings::get()->add("Log Verbosity", "core:log_verbosity",
+	                         static_cast<int>(LogVerbosity::INFO));
+
 	LoggerConfig logConfig;
 	logConfig.verbosity = static_cast<LogVerbosity>(logVerb->value());
 	Logger::initialize(logConfig);
@@ -66,7 +67,7 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 	}
 
 	std::vector<std::string> modList;
-	const auto modIterator = m_arguments.find("mods");
+	const auto               modIterator = m_arguments.find("mods");
 	if (modIterator != m_arguments.end())
 	{
 		std::stringstream modString(modIterator->second);
@@ -77,11 +78,12 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 		}
 	}
 
-	// we're not doing anything with the settings variable, but we don't actually use it yet so just let it be.
+	// we're not doing anything with the settings variable, but we don't
+	// actually use it yet so just let it be.
 	m_save = Save(m_arguments["save"], modList);
 }
 
-//void registerUnusedAPI(cms::ModManager* manager)
+// void registerUnusedAPI(cms::ModManager* manager)
 //{
 //	manager->registerFunction("core.input.registerInput",
 //	                          [](std::string uniqueName,
@@ -98,19 +100,14 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 //	manager->registerFunction("audio.play", [=](sol::table source) {});
 //}
 
-void Server::run()
-{
-	Settings::get()->load("settings.txt");
-
-	LoggerConfig config;
-	config.verbosity = LogVerbosity::DEBUG;
-	Logger::initialize(config);
-
-	
-	
-	Settings::get()->save("config.txt");
-}
+void Server::run() {}
 
 Server::~Server()
 {
+	// force save on shutdown.
+	m_save.toFile();
+
+	Settings::get()->save(m_arguments["config"]);
+
+	Logger::teardown();
 }
