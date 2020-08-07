@@ -71,7 +71,7 @@ Network::Network(const phx::net::Address& address, gfx::ChatBox* chat)
 Network::~Network()
 {
 	if (m_running)
-		stop();
+		kill();
 	delete m_client;
 }
 
@@ -85,15 +85,19 @@ void Network::run()
 
 void Network::start()
 {
-	m_running = true;
-    std::thread thread1 = std::thread(&Network::run, this);
-    std::swap(m_thread, thread1);
+	m_running           = true;
+	std::thread thread1(&Network::run, this);
+	std::swap(m_thread, thread1);
 }
 
-void Network::stop()
+void Network::kill()
 {
 	m_running = false;
-	m_thread.join();
+
+	if (m_thread.joinable())
+	{
+		m_thread.join();
+	}
 }
 
 void Network::parseEvent(phx::net::Packet& packet)
@@ -140,7 +144,7 @@ void Network::parseData(phx::net::Packet& packet)
 	auto data = packet.getData();
 
 	math::vec3 pos;
-	
+
 	phx::Serializer ser;
 	ser.setBuffer(reinterpret_cast<std::byte*>(data.data()), sizeof(float) * 3);
 	ser >> pos.x >> pos.y >> pos.z;

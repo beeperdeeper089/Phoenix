@@ -53,6 +53,9 @@ namespace phx
 	class Save
 	{
 	public:
+		// c++ is a bitch so i'm adding a default constructor.
+		Save() = default;
+		
 		/**
 		 * @brief Loads a save, creates one if the parameters are provided.
 		 * @param save The save to load.

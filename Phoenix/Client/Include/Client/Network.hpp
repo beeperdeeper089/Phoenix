@@ -48,12 +48,12 @@ namespace phx::client
 		Network(const phx::net::Address& address, gfx::ChatBox* chat);
 		~Network();
 
-	private:
-		void run();
-
 	public:
 		void start();
-		void stop();
+		void kill();
+
+	private:
+		void run();
 
 	private:
 		/**

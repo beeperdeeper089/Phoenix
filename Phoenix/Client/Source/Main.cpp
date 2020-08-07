@@ -34,6 +34,6 @@ using namespace phx;
 int main(int argc, char** argv)
 {
 	client::Client::get()->run();
-
+	
 	return 0;
 }

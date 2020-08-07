@@ -73,11 +73,7 @@ void Client::onEvent(events::Event e)
 	case EventType::KEY_PRESSED:
 		switch (e.keyboard.key)
 		{
-		case Keys::KEY_Q:
-			m_window.close();
-			e.handled = true;
-			break;
-		case Keys::KEY_P:
+		case Keys::KEY_F3:
 			m_debugOverlayActive = !m_debugOverlayActive;
 			if (m_debugOverlayActive)
 			{

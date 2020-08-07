@@ -28,17 +28,20 @@
 
 #pragma once
 
-#include <Client/Crosshair.hpp>
-#include <Client/EscapeMenu.hpp>
-#include <Client/GameTools.hpp>
-#include <Client/Graphics/Camera.hpp>
-#include <Client/Graphics/ChunkView.hpp>
+#include <Client/Voxels/BlockRegistry.hpp>
+
+#include <Client/Graphics/Window.hpp>
 #include <Client/Graphics/Layer.hpp>
 #include <Client/Graphics/ShaderPipeline.hpp>
-#include <Client/Graphics/Window.hpp>
+#include <Client/Graphics/Camera.hpp>
+#include <Client/Graphics/ChunkView.hpp>
 #include <Client/Graphics/ChatBox.hpp>
+
+#include <Client/GameTools.hpp>
+#include <Client/Crosshair.hpp>
+#include <Client/EscapeMenu.hpp>
+
 #include <Client/InputQueue.hpp>
-#include <Client/Voxels/BlockRegistry.hpp>
 
 #include <Common/CMS/ModManager.hpp>
 #include <Common/Save.hpp>
