@@ -74,10 +74,15 @@ void registerUnusedAPI(phx::cms::ModManager* manager)
 	manager->registerFunction("audio.play", [=](sol::table source) {});
 }
 
-
 Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
     : m_arguments(cliArguments)
 {
+}
+
+void Server::run()
+{
+	//// STARTUP ////
+	
 	// Load Settings.
 	const auto configIterator = m_arguments.find("config");
 	if (configIterator == m_arguments.end())
@@ -103,6 +108,7 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 		m_arguments["save"] = "World";
 	}
 
+	// Seperate CLI mod list into vector.
 	std::vector<std::string> modList;
 	const auto               modIterator = m_arguments.find("mods");
 	if (modIterator != m_arguments.end())
@@ -115,10 +121,10 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 		}
 	}
 
-	// we're not doing anything with the settings variable, but we don't
-	// actually use it yet so just let it be.
+	// Load Save
 	m_save = Save(m_arguments["save"], modList);
 
+	// Register modding APIs.
 	Settings::get()->registerAPI(&m_modManager);
 	m_blockRegistry.registerAPI(&m_modManager);
 	registerIntegralAPI(&m_modManager);
@@ -126,13 +132,40 @@ Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
 
 	// the server doesn't really care about progress, we'll just ignore it.
 	float progress = 0;
+
+	// Load mods.
 	m_modManager.load(m_save.getModList(), {"Modules"}, &progress);
-}
 
-void Server::run() {}
+	// Everything is ready for networking by now.
 
-Server::~Server()
-{
+	m_iris = new Iris(&m_registry);
+	
+	////////////////////////////////////////////
+	/// RUN SHIT
+	////////////////////////////////////////////
+
+	std::thread tIris(&server::Iris::run, m_iris);
+
+	m_running = true;
+	std::string input;
+	while (m_running)
+	{
+		std::cout << ">> ";
+		std::cin >> input;
+		if (input == "quit")
+		{
+			m_running = false;
+			m_iris->kill();
+		}
+	}
+
+	if (tIris.joinable())
+	{
+		tIris.join();
+	}
+
+	//// SHUTDOWN ////
+	
 	// force save on shutdown.
 	m_save.toFile();
 

@@ -26,46 +26,26 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Common/Logger.hpp>
 #include <Common/Network/Host.hpp>
+#include <Common/Logger.hpp>
 
 #include <utility>
 
 using namespace phx::net;
-
-std::atomic<std::size_t> Host::m_activeInstances = 0;
 
 Host::Host(std::size_t peers, const ENetAddress* address)
     : Host(address ? Address {*address} : Address {}, peers)
 {
 }
 
-Host::Host(const Address& address, std::size_t peers, std::size_t channels)
+Host::Host(const Address& address, std::size_t peers, std::size_t channels) : m_address(address)
 {
-	if (m_activeInstances == 0)
-	{
-		if (enet_initialize())
-		{
-			LOG_FATAL("NETCODE") << "Failed to initialize ENet networking.";
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	++m_activeInstances;
-
 	m_host = enet_host_create(address, peers, channels, 0, 0);
 }
 
 Host::~Host()
 {
-	--m_activeInstances;
-
 	enet_host_destroy(m_host);
-
-	if (m_activeInstances == 0)
-	{
-		enet_deinitialize();
-	}
 }
 
 Host::OptionalPeer Host::connect(const Address& address)

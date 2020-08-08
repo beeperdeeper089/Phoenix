@@ -40,6 +40,11 @@ Save::Save(const std::string& save, const std::vector<std::string>& mods,
 {
 	namespace fs = std::filesystem;
 
+	if (!fs::exists("Saves"))
+	{
+		fs::create_directory("Saves");
+	}
+	
 	auto path = fs::current_path() / "Saves" / save;
 	if (!fs::exists(path))
 	{

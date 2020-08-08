@@ -127,13 +127,6 @@ namespace phx
 	class Serializer
 	{
 	public:
-		enum class Mode
-		{
-			READ,
-			WRITE
-		};
-
-	public:
 		Serializer() = default;
 
 		data::Data& getBuffer() { return m_buffer; }
@@ -172,6 +165,8 @@ namespace phx
 
 		template <typename T>
 		Serializer& operator>>(std::basic_string<T>& val);
+
+		std::size_t size() const { return m_buffer.size(); }
 		
 	private:
 		template <typename T>
@@ -185,9 +180,6 @@ namespace phx
 
 		template <typename T>
 		void pop(std::basic_string<T>& data);
-
-	public:
-		Mode m_mode;
 
 	private:
 		data::Data m_buffer;

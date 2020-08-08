@@ -36,7 +36,7 @@ set_target_properties(SDL2main SDL2-static uninstall
 	Glad ImGui
 	lua liblua
 	enet aob build_version
-	OpenAL common
+	OpenAL common native-tools
 	PROPERTIES FOLDER Dependencies)
 
 # utility thing to make phoenix cmake tidier

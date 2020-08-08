@@ -26,45 +26,48 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-/**
- * @file Actor.hpp
- * @brief Header file for various components unique to Actors
- *
- * @copyright Copyright (c) 2019-2020 Genten Studios
- */
-
 #pragma once
-
-#include <Common/Input.hpp>
-#include <Common/Voxels/Block.hpp>
-#include <Common/Voxels/BlockReferrer.hpp>
-
-#include <entt/entt.hpp>
 
 namespace phx
 {
-	struct Hand
+	enum class NetworkChannels : unsigned char
 	{
-		voxels::BlockType* hand;
+		// get server info, connect, refusal messages, other general messages.
+		GENERAL = 0,
+
+		// literally, authentication. we won't do passwords and all yet since we don't have encryption.
+		AUTH,
+
+		// states.
+		STATE,
+
+		// chunk data, entity data, registry syncing, etc...
+		VOXEL_DATA,
+
+		// chat messages (includes commands).
+		MESSAGE,
+
+		// just the count of all the channels we need, makes it easier to expand.
+		COUNT
 	};
-
-	class ActorSystem
+	
+	enum class NetworkEvents
 	{
-	public:
-		// TODO this should be unique to each actor
-		static constexpr float m_reach = 32.f;
-
-		static void setBlockReferrer(voxels::BlockReferrer* referrer);
+		// start at one so we know 0 is always nothing from the extra piece of
+		// data that enet can handle on connect and disconnect.
 		
-		static math::Ray    getTarget(entt::registry* registry,
-		                              entt::entity    entity);
-		static entt::entity registerActor(entt::registry* registry);
-		static void         tick(entt::registry* registry, entt::entity entity,
-		                         float dt, const InputState& input);
-		static bool action1(entt::registry* registry, entt::entity entity);
-		static bool action2(entt::registry* registry, entt::entity entity);
+		// for use in the General channel.
+		GET_SERVER_INFO = 1,
+		CONNECT,
+		GRACEFUL_DISCONNECT,
+		KICK,
 
-	private:
-		static voxels::BlockReferrer* m_blockReferrer;
+		// for use in the Auth channel.
+		INVALID_AUTH,
+		SUCCESSFUL_AUTH,
+		
+		// for use in the VoxelData channel.
+		NEW_CHUNK,
+		CHUNK_UPDATE,
 	};
 } // namespace phx

@@ -35,7 +35,6 @@
 
 #include <enet/enet.h>
 
-#include <atomic>
 #include <functional>
 #include <optional>
 #include <unordered_map>
@@ -333,7 +332,5 @@ namespace phx::net
 
 		std::size_t                           m_peerID = 0;
 		std::unordered_map<std::size_t, Peer> m_peers;
-
-		static std::atomic<std::size_t> m_activeInstances;
 	};
 } // namespace phx::net

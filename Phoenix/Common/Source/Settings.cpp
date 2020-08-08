@@ -112,19 +112,15 @@ Setting* Settings::getSetting(const std::string& key)
 
 void Settings::load(const std::string& saveFile)
 {
-	std::ifstream file;
-	file.open(saveFile);
-	if (file)
+	std::ifstream file(saveFile);
+	if (file.is_open())
 	{
 		file >> m_data;
 	}
-	file.close();
 }
 
 void Settings::save(const std::string& saveFile)
 {
-	std::ofstream file;
-	file.open(saveFile);
+	std::ofstream file(saveFile);
 	file << std::setw(4) << m_data << std::endl;
-	file.close();
 }

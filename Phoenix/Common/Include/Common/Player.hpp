@@ -28,16 +28,25 @@
 
 #pragma once
 
-#include <enet/enet.h>
-#include <entt/entt.hpp>
-#include <string>
+#include <Common/Voxels/BlockReferrer.hpp>
 
-namespace phx::server
+#include <entt/entt.hpp>
+
+namespace phx
 {
+	struct Hand2
+	{
+		voxels::BlockType* object;
+
+		// we can store other stuff instead, maybe use a union down the line.
+	};
 
 	struct Player
 	{
-		entt::entity actor;
-		std::size_t  id;
+		std::string name;
+
+		entt::entity entity;
+		
+		Hand2 rightHand;
 	};
-} // namespace phx::server
+} // namespace phx

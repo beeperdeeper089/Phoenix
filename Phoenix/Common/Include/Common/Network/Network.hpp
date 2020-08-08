@@ -26,45 +26,30 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-/**
- * @file Actor.hpp
- * @brief Header file for various components unique to Actors
- *
- * @copyright Copyright (c) 2019-2020 Genten Studios
- */
-
 #pragma once
 
-#include <Common/Input.hpp>
-#include <Common/Voxels/Block.hpp>
-#include <Common/Voxels/BlockReferrer.hpp>
+#include <Common/Logger.hpp>
+#include <Common/Network/Address.hpp>
+#include <Common/Network/Host.hpp>
+#include <Common/Network/Peer.hpp>
+#include <Common/Network/Packet.hpp>
 
-#include <entt/entt.hpp>
+#include <enet/enet.h>
 
-namespace phx
+namespace phx::net
 {
-	struct Hand
-	{
-		voxels::BlockType* hand;
-	};
-
-	class ActorSystem
+	class Network
 	{
 	public:
-		// TODO this should be unique to each actor
-		static constexpr float m_reach = 32.f;
-
-		static void setBlockReferrer(voxels::BlockReferrer* referrer);
+		static void initialize()
+		{
+			if (enet_initialize())
+			{
+				LOG_FATAL("NETCODE") << "Failed to initialize ENet networking.";
+				exit(EXIT_FAILURE);
+			}
+		}
 		
-		static math::Ray    getTarget(entt::registry* registry,
-		                              entt::entity    entity);
-		static entt::entity registerActor(entt::registry* registry);
-		static void         tick(entt::registry* registry, entt::entity entity,
-		                         float dt, const InputState& input);
-		static bool action1(entt::registry* registry, entt::entity entity);
-		static bool action2(entt::registry* registry, entt::entity entity);
-
-	private:
-		static voxels::BlockReferrer* m_blockReferrer;
+		static void teardown() { enet_deinitialize(); }
 	};
-} // namespace phx
+} // namespace phx::net

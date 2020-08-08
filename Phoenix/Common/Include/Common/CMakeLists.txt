@@ -25,8 +25,11 @@ set(Headers
 	${currentDir}/Movement.hpp
 	${currentDir}/Input.hpp
 	${currentDir}/Save.hpp
-	${currentDir}/PlayerView.hpp
 	${currentDir}/Actor.hpp
+	${currentDir}/Player.hpp
+	${currentDir}/PlayerView.hpp
+
+	${currentDir}/GameNetwork.hpp
 
 	PARENT_SCOPE
 )
