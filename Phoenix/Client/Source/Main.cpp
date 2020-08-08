@@ -106,12 +106,12 @@ int main(int argc, char** argv)
 				    std::string message;
 				    ser >> message;
 
-		    		std::cout << "Auth failed: " << message << std::endl;
+		    		std::cout << "\n\nAuth failed: " << message << std::endl;
 		    	}
 			    else if (static_cast<NetworkEvents>(eventCode) ==
 			             NetworkEvents::SUCCESSFUL_AUTH)
 			    {
-				    std::cout << "We in bois" << std::endl;
+				    std::cout << "\n\nWe in bois" << std::endl;
 			    }
 		    }
 		    break;
@@ -174,6 +174,8 @@ int main(int argc, char** argv)
 
 		net::Packet packet(ser.getBuffer(), net::PacketFlags::RELIABLE);
 		peer.send(packet, static_cast<enet_uint8>(NetworkChannels::AUTH));
+
+		std::cout << "\n\n Attempting authentication with username: " << username;
 	});
 	
 	// now we connect with every channel
