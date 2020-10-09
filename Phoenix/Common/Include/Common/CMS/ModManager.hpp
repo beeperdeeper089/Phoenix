@@ -65,24 +65,10 @@ namespace phx::cms
 		using ModList = std::vector<std::string>;
 
 	public:
-		ModManager() = delete;
-
 		/**
 		 * @brief Constructs the manager by initializing the Lua state.
-		 * @param toLoad The list of mods to load.
-		 * @param paths The list of directories a mod could be found in.
-		 *
-		 * The allowance for extra paths to be used makes sure that someone can
-		 * have mods stored in different directories. This is especially helpful
-		 * for developers since they can work on their mod and store it
-		 * somewhere much more convenient for them while still being able to use
-		 * it.
-		 *
-		 * Also, this method registers all required base types (such as vec3 and
-		 * the likes since there is no better place to put that stuff without
-		 * coupling completely unrelated components).
 		 */
-		explicit ModManager(const ModList& toLoad, const ModList& paths);
+		ModManager();
 
 		/**
 		 * @brief Registers a C++ function into Lua.
@@ -106,10 +92,23 @@ namespace phx::cms
 
 		/**
 		 * @brief Loads the mods into the Lua state, ready for the game.
-		 * @param The current progress of the loading.
+		 * @param toLoad The list of mods to load.
+		 * @param paths The list of directories a mod could be found in.
+		 * @param progress The current progress of the loading.
 		 * @return The status of the load, can dictate fail or success.
+		 *
+		 * The allowance for extra paths to be used makes sure that someone can
+		 * have mods stored in different directories. This is especially helpful
+		 * for developers since they can work on their mod and store it
+		 * somewhere much more convenient for them while still being able to use
+		 * it.
+		 *
+		 * Also, this method registers all required base types (such as vec3 and
+		 * the likes since there is no better place to put that stuff without
+		 * coupling completely unrelated components).
 		 */
-		Status load(float* progress);
+		Status load(const ModList& toLoad, const ModList& paths,
+		            float* progress);
 
 		/**
 		 * @brief Cleans up mods once ready.
@@ -123,7 +122,7 @@ namespace phx::cms
 		 * @brief Gets the list of mods being loaded.
 		 * @return The list of loaded mods.
 		 */
-		const ModList&     getModList() const;
+		const ModList& getModList() const;
 
 		/**
 		 * @brief Gets the path of the currently loading mod.

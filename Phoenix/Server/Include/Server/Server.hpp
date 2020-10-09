@@ -28,17 +28,14 @@
 
 #pragma once
 
-#include <Server/Game.hpp>
-#include <Server/Iris.hpp>
-#include <Server/User.hpp>
-#include <Server/Voxels/BlockRegistry.hpp>
-
+#include <Common/Save.hpp>
 #include <Common/CMS/ModManager.hpp>
 
-#include <entt/entt.hpp>
-#include <enet/enet.h>
+#include <Server/Voxels/BlockRegistry.hpp>
 
-#include <array>
+#include <entt/entt.hpp>
+
+#include <unordered_map>
 #include <string>
 
 namespace phx::server
@@ -46,39 +43,20 @@ namespace phx::server
 	class Server
 	{
 	public:
-		/**
-		 * @brief Core object for the server
-		 *
-		 * @param save The save we are loading
-		 */
-		Server(const std::string& save);
-		~Server();
+		Server(const std::unordered_map<std::string, std::string>& cliArguments);
+		~Server() = default;
 
-		/// @brief Main loop for the server
 		void run();
 
 	private:
-		/// @brief central boolean to control if the game is running or not
+		std::unordered_map<std::string, std::string> m_arguments;
+
+		BlockRegistry   m_blockRegistry;
+		entt::registry  m_entityRegistry;
+		Save*           m_save = nullptr;
+		cms::ModManager m_modder;
+
 		bool m_running = true;
-
-		/// @brief The Server's block registry.
-		BlockRegistry m_blockRegistry;
-		
-		/// @brief An EnTT registry to store various data in
-		entt::registry m_registry;
-
-		/// @brief The networking object, this listens for incoming data
-		net::Iris* m_iris;
-
-		/**
-		 * @brief The server side game object, this handles all of the core game
-		 * logic.
-		 */
-		Game* m_game;
-
-		/// @brief The mod manager providing LUA API functionality
-		cms::ModManager* m_modManager;
-
-		Save* m_save;
+		//Iris* m_iris = nullptr;
 	};
 } // namespace phx::server
