@@ -3,6 +3,7 @@ set(Sources
 	${Sources}
 
 	${currentDir}/Mod.cpp
+	${currentDir}/ModManager.cpp
 
 	PARENT_SCOPE
 )
