@@ -36,83 +36,84 @@ using namespace phx::game;
 Mod::Mod(const std::string& name, const std::string& folder)
     : m_name(name), m_path(folder)
 {
+	namespace fs = std::filesystem;
+
+	fs::path modDir = fs::path(m_path) / m_name;
+	if (fs::exists(modDir) && fs::is_directory(modDir))
 	{
-		namespace fs = std::filesystem;
-		
-		fs::path modDir = fs::path(m_path) / m_name;
-		if (fs::exists(modDir) && fs::is_directory(modDir))
+		// folder exists, lets see what we can do now.
+		if (!fs::exists(modDir / "Init.lua"))
 		{
-			// folder exists, lets see what we can do now.
-			if (!fs::exists(modDir / "Init.lua"))
-			{
-				// Init.lua does not exist, not a valid mod.
-				LOG_FATAL("MODDING")
-				    << "The mod: " << m_name << "at: " << m_path
-				    << " is invalid. It does not contain an Init.lua";
-
-				// nothing more should be done, return here.
-				return;
-			}
-
-			// Init.lua exists, so far this is a valid mod in our eyes.
-			// now check if there are any dependencies.
-			if (fs::exists(modDir / "Dependencies.txt"))
-			{
-				std::fstream deps(modDir / "Dependencies.txt");
-				if (deps.is_open())
-				{
-					// there is a dependencies file. parse it.
-					// new mod per newline. optional at the front means
-					// optional, otherwise it is required.
-					std::string input;
-					while (std::getline(deps, input))
-					{
-						if (!input.empty())
-						{
-							Dependency dep;
-
-							constexpr char PARSE_OPTIONAL[] = "optional ";
-							constexpr std::size_t PARSE_OPTIONAL_CHAR_COUNT =
-							    sizeof(PARSE_OPTIONAL) - 1; // -1 cos null terminator.
-							
-							// probably not particularly efficient, but this
-							// doesn't need to be. this just checks whether the
-							// start of the string says "optional " (with the
-							// space).
-							if (input.substr(0, PARSE_OPTIONAL_CHAR_COUNT) == PARSE_OPTIONAL)
-							{
-								// dependency is optional, strip first set of characters.
-								dep.name     = input.substr(PARSE_OPTIONAL_CHAR_COUNT);
-								dep.optional = true;
-							}
-							else
-							{
-								// dependency is not optional, move the whole string over.
-								dep.name = std::move(input);
-							}
-
-							m_dependencies.emplace_back(std::move(dep));
-
-						}
-					}
-				}
-			}
-		}
-		else
-		{
+			// Init.lua does not exist, not a valid mod.
 			LOG_FATAL("MODDING")
-			    << "The mod: " << m_name
-			    << " was not found at the requested location: " << m_path;
+			    << "The mod: " << m_name << "at: " << m_path
+			    << " is invalid. It does not contain an Init.lua";
 
 			// nothing more should be done, return here.
 			return;
 		}
+
+		// Init.lua exists, so far this is a valid mod in our eyes.
+		// now check if there are any dependencies.
+		if (fs::exists(modDir / "Dependencies.txt"))
+		{
+			std::fstream deps(modDir / "Dependencies.txt");
+			if (deps.is_open())
+			{
+				// there is a dependencies file. parse it.
+				// new mod per newline. optional at the front means
+				// optional, otherwise it is required.
+				std::string input;
+				while (std::getline(deps, input))
+				{
+					if (!input.empty())
+					{
+						Dependency dep;
+
+						constexpr char        PARSE_OPTIONAL[] = "optional ";
+						constexpr std::size_t PARSE_OPTIONAL_CHAR_COUNT =
+						    sizeof(PARSE_OPTIONAL) -
+						    1; // -1 cos null terminator.
+
+						// probably not particularly efficient, but this
+						// doesn't need to be. this just checks whether the
+						// start of the string says "optional " (with the
+						// space).
+						if (input.substr(0, PARSE_OPTIONAL_CHAR_COUNT) ==
+						    PARSE_OPTIONAL)
+						{
+							// dependency is optional, strip first set of
+							// characters.
+							dep.name = input.substr(PARSE_OPTIONAL_CHAR_COUNT);
+							dep.optional = true;
+						}
+						else
+						{
+							// dependency is not optional, move the whole string
+							// over.
+							dep.name = std::move(input);
+						}
+
+						m_dependencies.emplace_back(std::move(dep));
+					}
+				}
+			}
+		}
+
+		m_valid = true;
+	}
+	else
+	{
+		LOG_FATAL("MODDING")
+		    << "The mod: " << m_name
+		    << " was not found at the requested location: " << m_path;
+
+		// nothing more should be done, return here.
+		return;
 	}
 }
 
-Mod::~Mod()
-{
-}
+bool Mod::valid() const { return m_valid; }
 
 const std::string& Mod::getName() const { return m_name; }
 

@@ -47,7 +47,9 @@ namespace phx::game
 		Mod() = delete;
 
 		Mod(const std::string& name, const std::string& folder);
-		~Mod();
+		~Mod() = default;
+
+		bool valid() const;
 
 		const std::string& getName() const;
 		const std::string& getPath() const;
@@ -55,6 +57,8 @@ namespace phx::game
 		const std::vector<Dependency>& getDependencies() const;
 
 	private:
+		bool m_valid = false;
+		
 		std::string m_name;
 
 		// does not include the path of the mod itself, just the path it is within.
