@@ -28,7 +28,7 @@
 
 #include <Client/InputQueue.hpp>
 
-#include <Common/Position.hpp>
+#include <Common/Game/Components/Position.hpp>
 
 using namespace phx::client;
 using namespace phx;

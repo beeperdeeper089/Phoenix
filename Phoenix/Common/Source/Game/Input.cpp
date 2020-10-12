@@ -26,7 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Common/Input.hpp>
+#include <Common/Game/Input.hpp>
 
 phx::Serializer& phx::InputState::operator>>(Serializer& serializer) const
 {

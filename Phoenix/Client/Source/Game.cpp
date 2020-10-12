@@ -32,13 +32,13 @@
 #include <Common/CMS/ModManager.hpp>
 #include <Common/Utility/Serializer.hpp>
 
-#include <Common/Actor.hpp>
-#include <Common/Commander.hpp>
-#include <Common/Position.hpp>
+#include <Common/Game/Actor.hpp>
+#include <Common/Game/Commander.hpp>
+#include <Common/Game/Components/Position.hpp>
 #include <Common/Logger.hpp>
-#include <Common/Movement.hpp>
+#include <Common/Game/Movement.hpp>
 
-#include <Common/PlayerView.hpp>
+#include <Common/Game/PlayerView.hpp>
 #include <cmath>
 #include <tuple>
 

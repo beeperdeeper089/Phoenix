@@ -33,7 +33,7 @@
 #	define NOMINMAX
 #endif
 
-#include <Common/Input.hpp>
+#include <Common/Game/Input.hpp>
 #include <Common/Network/Host.hpp>
 #include <Common/Utility/BlockingQueue.hpp>
 #include <Common/Voxels/Chunk.hpp>

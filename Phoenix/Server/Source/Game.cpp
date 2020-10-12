@@ -29,8 +29,8 @@
 #include <Server/Game.hpp>
 #include <Server/User.hpp>
 
-#include <Common/Actor.hpp>
-#include <Common/PlayerView.hpp>
+#include <Common/Game/Actor.hpp>
+#include <Common/Game/PlayerView.hpp>
 
 #include <thread>
 

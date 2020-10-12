@@ -33,7 +33,7 @@
  * @copyright Copyright (c) 2019-2020 Genten Studios
  */
 
-#include <Common/Input.hpp>
+#include <Common/Game/Input.hpp>
 #include <Common/Voxels/Block.hpp>
 #include <Common/Voxels/BlockReferrer.hpp>
 

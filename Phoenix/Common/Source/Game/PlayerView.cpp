@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <Common/Logger.hpp>
-#include <Common/PlayerView.hpp>
+#include <Common/Game/PlayerView.hpp>
 
 using namespace phx;
 

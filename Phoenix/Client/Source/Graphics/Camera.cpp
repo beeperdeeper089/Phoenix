@@ -28,7 +28,7 @@
 
 #include <Client/Graphics/Camera.hpp>
 
-#include <Common/Position.hpp>
+#include <Common/Game/Components/Position.hpp>
 
 using namespace phx;
 using namespace gfx;

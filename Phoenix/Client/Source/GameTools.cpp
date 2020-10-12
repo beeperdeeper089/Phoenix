@@ -28,8 +28,8 @@
 
 #include <Client/GameTools.hpp>
 
-#include <Common/Actor.hpp>
-#include <Common/Position.hpp>
+#include <Common/Game/Actor.hpp>
+#include <Common/Game/Position.hpp>
 
 #include <imgui.h>
 

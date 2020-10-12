@@ -42,7 +42,7 @@
 #include <Client/Voxels/BlockRegistry.hpp>
 
 #include <Common/CMS/ModManager.hpp>
-#include <Common/Save.hpp>
+#include <Common/Game/Save.hpp>
 
 namespace phx::client
 {

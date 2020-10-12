@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include <Common/Position.hpp>
+#include <Common/Game/Components/Position.hpp>
 #include <Common/Voxels/Map.hpp>
 
 #include <entt/entt.hpp>

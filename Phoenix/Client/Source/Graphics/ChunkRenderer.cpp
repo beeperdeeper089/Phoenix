@@ -30,8 +30,8 @@
 #include <Client/Graphics/ChunkRenderer.hpp>
 #include <Client/Graphics/OpenGLTools.hpp>
 
-#include <Common/Actor.hpp>
-#include <Common/PlayerView.hpp>
+#include <Common/Game/Actor.hpp>
+#include <Common/Game/PlayerView.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <glad/glad.h>

@@ -29,10 +29,10 @@
 #include <Server/Iris.hpp>
 #include <Server/User.hpp>
 
-#include <Common/Actor.hpp>
+#include <Common/Game/Actor.hpp>
 #include <Common/Logger.hpp>
-#include <Common/Movement.hpp>
-#include <Common/Position.hpp>
+#include <Common/Game/Movement.hpp>
+#include <Common/Game/Position.hpp>
 #include <Common/Utility/Serializer.hpp>
 
 using namespace phx;

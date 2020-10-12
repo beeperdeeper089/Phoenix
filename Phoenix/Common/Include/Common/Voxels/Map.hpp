@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include <Common/Save.hpp>
+#include <Common/Game/Save.hpp>
 #include <Common/Utility/BlockingQueue.hpp>
 #include <Common/Voxels/BlockReferrer.hpp>
 #include <Common/Voxels/Chunk.hpp>

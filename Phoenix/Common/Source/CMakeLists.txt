@@ -2,6 +2,7 @@ add_subdirectory(Math)
 add_subdirectory(Network)
 add_subdirectory(Voxels)
 add_subdirectory(Game)
+add_subdirectory(CMS)
 
 set(currentDir ${CMAKE_CURRENT_LIST_DIR})
 set(Sources

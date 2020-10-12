@@ -62,7 +62,8 @@ Mod::Mod(const std::string& name, const std::string& folder)
 				if (deps.is_open())
 				{
 					// there is a dependencies file. parse it.
-					// new mod per newline. ! at the front means optional, otherwise it is required.
+					// new mod per newline. optional at the front means
+					// optional, otherwise it is required.
 					std::string input;
 					while (std::getline(deps, input))
 					{
@@ -70,15 +71,23 @@ Mod::Mod(const std::string& name, const std::string& folder)
 						{
 							Dependency dep;
 
-							if (input[0] == '!')
+							constexpr char PARSE_OPTIONAL[] = "optional ";
+							constexpr std::size_t PARSE_OPTIONAL_CHAR_COUNT =
+							    sizeof(PARSE_OPTIONAL) - 1; // -1 cos nullptr.
+							
+							// probably not particularly efficient, but this
+							// doesn't need to be. this just checks whether the
+							// start of the string says "optional " (with the
+							// space).
+							if (input.substr(0, PARSE_OPTIONAL_CHAR_COUNT) == PARSE_OPTIONAL)
 							{
-								// dependency is optional, strip first character since that is a !.
-								dep.name     = input.substr(1);
+								// dependency is optional, strip first set of characters.
+								dep.name     = input.substr(PARSE_OPTIONAL_CHAR_COUNT);
 								dep.optional = true;
 
 								// testing.
 								LOG_DEBUG("MODDING")
-								    << "Optional Mod: " << input.substr(1);
+								    << "Optional Mod: " << input.substr(PARSE_OPTIONAL_CHAR_COUNT);
 							}
 							else
 							{
@@ -86,7 +95,10 @@ Mod::Mod(const std::string& name, const std::string& folder)
 								dep.name = std::move(input);
 							}
 
+							LOG_INFO("DEPENDENCY") << dep.name;
+
 							m_dependencies.emplace_back(std::move(dep));
+
 						}
 					}
 				}

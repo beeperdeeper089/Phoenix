@@ -35,7 +35,7 @@
  *
  */
 
-#include <Common/Commander.hpp>
+#include <Common/Game/Commander.hpp>
 
 using namespace phx;
 
