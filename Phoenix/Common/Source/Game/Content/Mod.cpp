@@ -73,7 +73,7 @@ Mod::Mod(const std::string& name, const std::string& folder)
 
 							constexpr char PARSE_OPTIONAL[] = "optional ";
 							constexpr std::size_t PARSE_OPTIONAL_CHAR_COUNT =
-							    sizeof(PARSE_OPTIONAL) - 1; // -1 cos nullptr.
+							    sizeof(PARSE_OPTIONAL) - 1; // -1 cos null terminator.
 							
 							// probably not particularly efficient, but this
 							// doesn't need to be. this just checks whether the
@@ -84,18 +84,12 @@ Mod::Mod(const std::string& name, const std::string& folder)
 								// dependency is optional, strip first set of characters.
 								dep.name     = input.substr(PARSE_OPTIONAL_CHAR_COUNT);
 								dep.optional = true;
-
-								// testing.
-								LOG_DEBUG("MODDING")
-								    << "Optional Mod: " << input.substr(PARSE_OPTIONAL_CHAR_COUNT);
 							}
 							else
 							{
 								// dependency is not optional, move the whole string over.
 								dep.name = std::move(input);
 							}
-
-							LOG_INFO("DEPENDENCY") << dep.name;
 
 							m_dependencies.emplace_back(std::move(dep));
 
