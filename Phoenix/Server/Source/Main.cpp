@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	Logger::initialize({"phoenix.log", LogVerbosity::DEBUG});
 
 	game::ModManager manager;
-	manager.setup({"mod1", "mod2"}, "Modules");
+	manager.setup({"mod1", "mod2"}, {"Modules"});
 	
 	if (!manager.validate())
 	{

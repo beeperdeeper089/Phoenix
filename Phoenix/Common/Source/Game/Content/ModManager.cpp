@@ -233,4 +233,7 @@ void ModManager::registerUsertype(const std::string& usertype)
 
 sol::state_view ModManager::getUnderlyingState()
 {
+	// i'm not sure whether we can return m_state or if we have to return the
+	// direct lua state.
+	return m_state.lua_state();
 }
