@@ -73,6 +73,7 @@ ModManager::ModManager()
 	m_state.open_libraries(sol::lib::base);
 	m_state.set_panic(
 	    sol::c_call<decltype(&CustomPanicHandler), &CustomPanicHandler>);
+	m_state.set_exception_handler(&CustomExceptionHandler);
 }
 
 void ModManager::setup(const ModList& mods, const ModList& paths)
