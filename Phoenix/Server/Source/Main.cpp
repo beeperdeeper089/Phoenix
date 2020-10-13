@@ -29,6 +29,7 @@
 #include <Server/Server.hpp>
 
 #include <Common/Game/Content/Mod.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 using namespace phx;
 
@@ -36,10 +37,21 @@ using namespace phx;
 int main(int argc, char** argv)
 {
 	Logger::initialize({"phoenix.log", LogVerbosity::DEBUG});
+
+	game::ModManager manager;
+	manager.setup({"mod1", "mod2"}, "Modules");
 	
-	game::Mod mod("mod1", "Modules/");
-	game::Mod mod2("mod2", "Modules/");
-	game::Mod mod3("mod3", "Modules/");
+	if (!manager.validate())
+	{
+		LOG_FATAL("MODDING") << manager.getError();
+		return 1;
+	}
+	
+	float progress = 0.f;
+	if (!manager.load(&progress))
+	{
+		LOG_FATAL("MODDING") << "Error during load: " << manager.getError();
+	}
 	
 	//    std::string save;
 	//    if (argc > 0){
