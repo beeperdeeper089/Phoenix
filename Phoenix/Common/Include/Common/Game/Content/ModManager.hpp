@@ -56,6 +56,8 @@ namespace phx::game
 		bool        validate();
 		bool        load(float* progress);
 		const Mod&  getActiveMod() const;
+
+		const std::vector<Mod>& getActiveMods() const;
 		
 		std::string getError();
 

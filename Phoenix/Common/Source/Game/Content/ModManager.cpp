@@ -105,6 +105,8 @@ bool ModManager::validate()
 		}
 	}
 
+	// check to make sure all mods exist.
+	std::queue<Mod> checked;
 	for (auto& name : m_mods)
 	{
 		bool found = false;
@@ -115,7 +117,7 @@ bool ModManager::validate()
 			if (mod.valid())
 			{
 				found = true;
-				m_loadOrder.emplace(mod);
+				checked.emplace(mod);
 				break;
 			}
 		}
@@ -137,30 +139,26 @@ bool ModManager::validate()
 			return false;
 		}
 	}
-	
-	return true;
-}
 
-bool ModManager::load(float* progress)
-{
-	namespace fs = std::filesystem;
-	
-	while (!m_loadOrder.empty())
+	// make sure every mod has it's dependency.
+	// also push to load order.
+	while (!checked.empty())
 	{
-		std::size_t lastPass = m_loadOrder.size();
+		const std::size_t lastPass = checked.size();
 
-		for (std::size_t i = 0; i < m_loadOrder.size(); ++i)
+		for (std::size_t i = 0; i < checked.size(); ++i)
 		{
-			Mod& mod       = m_loadOrder.front();
+			Mod& mod       = checked.front();
 			bool satisfied = true;
 
-			for (auto& dependency : mod.getDependencies())
+			for (const auto& dependency : mod.getDependencies())
 			{
 				if (std::find(m_mods.begin(), m_mods.end(), dependency.name) == m_mods.end())
 				{
 					// dep doesn't exist.
 
-					// dep is optional, so just continue with the next dependency.
+					// dep is optional, so just continue with the next
+					// dependency.
 					if (dependency.optional)
 					{
 						continue;
@@ -175,49 +173,81 @@ bool ModManager::load(float* progress)
 
 			if (satisfied)
 			{
-				fs::path initLoc =
-				    fs::path(mod.getPath()) / mod.getName() / "Init.lua";
-
-				sol::protected_function_result pfr = m_state.safe_script_file(
-				    initLoc.string(), &sol::script_pass_on_error);
-
-				if (!pfr.valid())
-				{
-					sol::error err = pfr;
-
-					m_errorState = State::ERRORED;
-					m_error = "An error occured loading ";
-					m_error += mod.getName();
-					m_error += ": ";
-					m_error += err.what();
-
-					return false;
-				}
+				m_loadOrder.push(checked.front());
 			}
 			else
 			{
-				m_loadOrder.push(m_loadOrder.front());
+				checked.push(checked.front());
 			}
 
-			m_loadOrder.pop();
+			checked.pop();
 		}
 
-		if (lastPass == m_loadOrder.size())
+		if (lastPass == checked.size())
 		{
 			m_errorState = State::ERRORED;
-			m_error = "The mod: ";
-			m_error += m_loadOrder.front().getName();
+			m_error      = "The mod: ";
+			m_error += checked.front().getName();
 			m_error += " has one or more missing dependencies.";
 
 			return false;
 		}
 	}
+
+	// everything is good, tell the caller that all's good.
+	return true;
+}
+
+bool ModManager::load(float* progress)
+{
+	namespace fs = std::filesystem;
+
+	// load all mods. quit on error.
+	while (!m_loadOrder.empty())
+	{
+		Mod& mod = m_loadOrder.front();
+		
+		fs::path initLoc = fs::path(mod.getPath()) / mod.getName() / "Init.lua";
+
+		sol::protected_function_result pfr = m_state.safe_script_file(
+		    initLoc.string(), &sol::script_pass_on_error);
+
+		if (!pfr.valid())
+		{
+			sol::error err = pfr;
+
+			m_errorState = State::ERRORED;
+			m_error      = "An error occured loading ";
+			m_error += mod.getName();
+			m_error += ": ";
+			m_error += err.what();
+
+			return false;
+		}
+
+		m_loadOrder.pop();
+	}
+
+	// to anyone reading this: if we need to keep these, just delete the
+	// respective lines of code, clearing this is not essential, it just makes
+	// sense since as of right now, we don't need them at all anymore.
+	// the active, loaded mods can be requested via getActiveMods.
+	// we've loaded all the mods, now we can just clear m_mods.
+	m_mods.clear();
+	// we can also clear m_paths.
+	m_paths.clear();
 	
+	// all went good, lets go!
 	return true;
 }
 
 // can throw but it really shouldn't if the loading logic is correct.
 const Mod& ModManager::getActiveMod() const { return m_loadOrder.front(); }
+
+const std::vector<Mod>& ModManager::getActiveMods() const
+{
+	return m_loadedMods;
+}
 
 std::string ModManager::getError() { return m_error; }
 
