@@ -95,3 +95,5 @@ jobs:
           if (NOT result EQUAL 0)
             message(FATAL_ERROR "CMake Build command failed.")
           endif()
+      - name: Test Project
+        run: cd Build/Phoenix/Server && ./PhoenixServer
