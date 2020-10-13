@@ -30,12 +30,12 @@
 
 // Header exists in ModManager.hpp
 
-namespace phx::cms
+namespace phx::game
 {
 	// can do template<typename RtnType, typename... Args>
 	// but allowing for anything makes sure you can capture lambdas.
-	template <typename F>
-	void ModManager::registerFunction(const std::string& funcName, const F& func)
+	template <typename T>
+	void ModManager::registerFunction(const std::string& funcName, const T& func)
 	{
 		// splitting the function name by periods.
 		// something like core.block.register would be broken down into
@@ -96,4 +96,4 @@ namespace phx::cms
 			       "\"core.block.register\".";
 		}
 	}
-} // namespace phx::mods
+} // namespace phx::game

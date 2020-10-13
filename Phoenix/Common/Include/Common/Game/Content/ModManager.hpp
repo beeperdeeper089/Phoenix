@@ -64,9 +64,6 @@ namespace phx::game
 		template <typename T>
 		void registerFunction(const std::string& funcName, const T& func);
 
-		template <typename T>
-		void registerUsertype(const std::string& usertype);
-
 		sol::state_view getUnderlyingState();
 		
 	private:
@@ -82,3 +79,5 @@ namespace phx::game
 		sol::state m_state;
 	};
 } // namespace phx::game
+
+#include <Common/Game/Content/ModManager.inl>

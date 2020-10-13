@@ -5,5 +5,7 @@ set(Headers
 	${currentDir}/Mod.hpp
 	${currentDir}/ModManager.hpp
 
+	${currentDir}/ModManager.inl
+
 	PARENT_SCOPE
 )

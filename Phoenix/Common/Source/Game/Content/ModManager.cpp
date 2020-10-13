@@ -252,16 +252,6 @@ const std::vector<Mod>& ModManager::getActiveMods() const
 
 std::string ModManager::getError() { return m_error; }
 
-template <typename T>
-void ModManager::registerFunction(const std::string& funcName, const T& func)
-{
-}
-
-template <typename T>
-void ModManager::registerUsertype(const std::string& usertype)
-{
-}
-
 sol::state_view ModManager::getUnderlyingState()
 {
 	// i'm not sure whether we can return m_state or if we have to return the
