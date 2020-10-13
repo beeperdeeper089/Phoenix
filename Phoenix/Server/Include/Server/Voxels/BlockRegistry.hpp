@@ -38,7 +38,7 @@
 #pragma once
 
 #include <Common/Voxels/BlockReferrer.hpp>
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 namespace phx::server
 {
@@ -57,7 +57,7 @@ namespace phx::server
 		
 		voxels::BlockReferrer referrer;
 
-		void registerAPI(cms::ModManager* manager)
+		void registerAPI(game::ModManager* manager)
 		{
 			manager->registerFunction(
 			    "voxel.block.register",

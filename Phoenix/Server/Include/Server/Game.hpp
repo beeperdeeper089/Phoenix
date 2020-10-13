@@ -58,7 +58,7 @@ namespace phx::server
 		 *
 		 * @param manager The mod manager to load the API into
 		 */
-		void registerAPI(cms::ModManager* manager);
+		void registerAPI(game::ModManager* manager);
 
 		/**
 		 * @brief Runs the main game loop as long as running is true

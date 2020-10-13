@@ -39,7 +39,7 @@
 
 #include <Server/Iris.hpp>
 
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 #include <entt/entity/registry.hpp>
 
@@ -75,7 +75,7 @@ namespace phx::server
 	public:
 		explicit Commander(net::Iris* iris);
 
-		void registerAPI(cms::ModManager* manager);
+		void registerAPI(game::ModManager* manager);
 
 		/**
 		 * @brief Registers a command in the command registry.

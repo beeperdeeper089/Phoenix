@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <Common/Logger.hpp>
 #include <Common/Game/Content/Mod.hpp>
 
 #include <sol/sol.hpp>

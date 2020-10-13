@@ -51,7 +51,7 @@ Server::Server(const std::string& save)
 	m_game = new Game(&m_blockRegistry, &m_registry, m_iris, m_save);
 }
 
-void registerUnusedAPI(cms::ModManager* manager)
+void registerUnusedAPI(game::ModManager* manager)
 {
 	manager->registerFunction("core.input.registerInput",
 	                          [](std::string uniqueName,
@@ -80,7 +80,7 @@ void Server::run()
 
 	// Initialize the Modules //
 
-	m_modManager = new cms::ModManager(m_save->getModList(), {"Modules"});
+	m_modManager = new game::ModManager();
 
 	m_modManager->registerFunction("core.print", [=](const std::string& text) {
 		std::cout << text << "\n";
@@ -104,12 +104,22 @@ void Server::run()
 		LOG_DEBUG("MODULE") << message;
 	});
 
-	float progress = 0.f;
-	auto  result   = m_modManager->load(&progress);
+	m_modManager->setup(m_save->getModList(), {"Modules"});
 
-	if (!result.ok)
+	auto result = m_modManager->validate();
+	if (!result)
+	{
+		LOG_FATAL("CMS") << "An error occurred during mod initialization.";
+		LOG_FATAL("CMS") << m_modManager->getError();
+		exit(EXIT_FAILURE);
+	}
+	
+	float progress = 0.f;
+	result         = m_modManager->load(&progress);
+	if (!result)
 	{
 		LOG_FATAL("CMS") << "An error has occurred loading modules.";
+		LOG_FATAL("CMS") << m_modManager->getError();
 		exit(EXIT_FAILURE);
 	}
 

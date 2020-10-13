@@ -38,7 +38,7 @@
 #pragma once
 
 #include <Common/Singleton.hpp>
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 #include <functional>
 #include <ostream>
@@ -72,7 +72,7 @@ namespace phx
 		CommandBook() = default;
 		~CommandBook() = default;
 
-		void registerAPI(cms::ModManager* manager);
+		void registerAPI(game::ModManager* manager);
 
 		/**
 		 * @brief Registers a command in the command registry.

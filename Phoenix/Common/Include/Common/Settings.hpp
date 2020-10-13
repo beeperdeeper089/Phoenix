@@ -37,7 +37,7 @@
 #pragma once
 
 #include <Common/Singleton.hpp>
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -154,7 +154,7 @@ namespace phx
 	public:
 		Settings();
 
-		void registerAPI(cms::ModManager* manager);
+		void registerAPI(game::ModManager* manager);
 
 		/**
 		 * @brief Adds a new setting.

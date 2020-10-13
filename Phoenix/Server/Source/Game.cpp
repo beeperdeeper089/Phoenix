@@ -51,7 +51,7 @@ Game::~Game()
     delete m_commander;
 }
 
-void Game::registerAPI(cms::ModManager* manager)
+void Game::registerAPI(game::ModManager* manager)
 {
 	m_commander->registerAPI(manager);
 }

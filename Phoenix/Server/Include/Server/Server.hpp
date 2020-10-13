@@ -33,7 +33,7 @@
 #include <Server/User.hpp>
 #include <Server/Voxels/BlockRegistry.hpp>
 
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 #include <entt/entt.hpp>
 #include <enet/enet.h>
@@ -77,7 +77,7 @@ namespace phx::server
 		Game* m_game;
 
 		/// @brief The mod manager providing LUA API functionality
-		cms::ModManager* m_modManager;
+		game::ModManager* m_modManager;
 
 		Save* m_save;
 	};

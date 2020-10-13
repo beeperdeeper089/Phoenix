@@ -42,7 +42,7 @@ using namespace phx::server;
 
 Commander::Commander(net::Iris* iris) : m_iris(iris) {}
 
-void Commander::registerAPI(phx::cms::ModManager* manager)
+void Commander::registerAPI(phx::game::ModManager* manager)
 {
 	/**
 	* @addtogroup luaapi

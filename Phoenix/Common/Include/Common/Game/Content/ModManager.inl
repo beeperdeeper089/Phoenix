@@ -58,34 +58,34 @@ namespace phx::game
 		// infinite recursion doesn't work.
 		if (branches.size() == 1)
 		{
-			m_luaState[branches[0]] = func;
+			m_state[branches[0]] = func;
 			return;
 		}
 
 		if (branches.size() == 2)
 		{
-			if (!m_luaState[branches[0]].valid())
+			if (!m_state[branches[0]].valid())
 			{
-				m_luaState[branches[0]] = m_luaState.create_table();
+				m_state[branches[0]] = m_state.create_table();
 			}
 
-			m_luaState[branches[0]][branches[1]] = func;
+			m_state[branches[0]][branches[1]] = func;
 		}
 
 		if (branches.size() == 3)
 		{
-			if (!m_luaState[branches[0]].valid())
+			if (!m_state[branches[0]].valid())
 			{
-				m_luaState[branches[0]] = m_luaState.create_table();
+				m_state[branches[0]] = m_state.create_table();
 			}
 
-			if (!m_luaState[branches[0]][branches[1]].valid())
+			if (!m_state[branches[0]][branches[1]].valid())
 			{
-				m_luaState[branches[0]][branches[1]] =
-				    m_luaState.create_table();
+				m_state[branches[0]][branches[1]] =
+				    m_state.create_table();
 			}
 
-			m_luaState[branches[0]][branches[1]][branches[2]] = func;
+			m_state[branches[0]][branches[1]][branches[2]] = func;
 		}
 
 		if (branches.size() > 3)
