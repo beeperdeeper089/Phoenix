@@ -41,7 +41,7 @@
 #include <Client/InputQueue.hpp>
 #include <Client/Voxels/BlockRegistry.hpp>
 
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 #include <Common/Game/Save.hpp>
 
 namespace phx::client
@@ -102,7 +102,7 @@ namespace phx::client
 
 		gfx::ChatBox* m_chat = nullptr;
 
-		cms::ModManager* m_modManager;
+		game::ModManager* m_modManager;
 
 		Crosshair*  m_crosshair  = nullptr;
 		EscapeMenu* m_escapeMenu = nullptr;
@@ -115,11 +115,6 @@ namespace phx::client
 		client::InputQueue* m_inputQueue = nullptr;
 		// This is an internal log of the recent input states sent to the server
 		std::list<InputState> m_states;
-
-		// intermediary variables to prevent getting the pointer from the client
-		// singleton every tick.
-		audio::Audio*    m_audio;
-		audio::Listener* m_listener;
 
 		Save* m_save = nullptr;
 	};

@@ -61,4 +61,3 @@ namespace phx::client
 		float               m_multiplier = 1.f;
 	};
 } // namespace phx::client
-

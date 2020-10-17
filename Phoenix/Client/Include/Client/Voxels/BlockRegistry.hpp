@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 #include <Common/Registry.hpp>
 #include <Common/Voxels/BlockReferrer.hpp>
 
@@ -63,7 +63,7 @@ namespace phx::client
 
 		Registry<std::size_t, std::vector<std::string>> textures;
 
-		void registerAPI(cms::ModManager* manager)
+		void registerAPI(game::ModManager* manager)
 		{
 			manager->registerFunction(
 			    "voxel.block.register", [manager, this](sol::table luaBlock) {
@@ -78,7 +78,9 @@ namespace phx::client
 					{
 						// log the error and return to make this a recoverable error.
 					    LOG_FATAL("MODDING")
-					        << "The mod at: " << manager->getCurrentModPath()
+					        << "The mod at: "
+					        << manager->getActiveMod().getPath()
+					        << manager->getActiveMod().getName()
 					        << " attempts to register a block without "
 					        << "specifying a name.";
 						return;
@@ -94,7 +96,9 @@ namespace phx::client
 					    // log the error and return to make this a recoverable
 					    // error.
 					    LOG_FATAL("MODDING")
-					        << "The mod at: " << manager->getCurrentModPath()
+					        << "The mod at: "
+					        << manager->getActiveMod().getPath()
+					        << manager->getActiveMod().getName()
 					        << " attempts to register a block ("
 					        << block.displayName << ") without "
 					        << "specifying a name.";
@@ -152,7 +156,8 @@ namespace phx::client
 					    {
 						    // we have to do this so it's pointing to the right
 						    // directory.
-						    tex = manager->getCurrentModPath() + tex;
+						    tex = manager->getActiveMod().getPath() + "/" +
+						          manager->getActiveMod().getName() + "/" + tex;
 					    }
 
 					    setTex = true;

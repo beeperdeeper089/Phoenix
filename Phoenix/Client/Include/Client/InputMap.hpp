@@ -32,7 +32,7 @@
 #include <Client/Events/IEventListener.hpp>
 
 #include <Common/Singleton.hpp>
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 
 #include <functional>
 #include <string>
@@ -65,7 +65,7 @@ namespace phx::client
 		InputMap();
 		~InputMap();
 
-		void registerAPI(cms::ModManager* manager);
+		void registerAPI(game::ModManager* manager);
 
 		/**
 		 * @brief Forwards call to any matching registered callbacks

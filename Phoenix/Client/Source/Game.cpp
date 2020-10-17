@@ -29,7 +29,7 @@
 #include <Client/Client.hpp>
 #include <Client/Game.hpp>
 
-#include <Common/CMS/ModManager.hpp>
+#include <Common/Game/Content/ModManager.hpp>
 #include <Common/Utility/Serializer.hpp>
 
 #include <Common/Game/Actor.hpp>
@@ -68,7 +68,7 @@ Game::Game(gfx::Window* window, entt::registry* registry, bool networked)
 	std::vector<std::string> commandLineModList = {"mod1", "mod2", "mod3"};
 	m_save = new Save(saveToUse, commandLineModList);
 	
-	m_modManager = new cms::ModManager(m_save->getModList(), {"Modules"});
+	m_modManager = new game::ModManager();
 
 	m_blockRegistry.registerAPI(m_modManager);
 
@@ -79,23 +79,6 @@ Game::Game(gfx::Window* window, entt::registry* registry, bool networked)
 	m_modManager->registerFunction("core.print", [=](const std::string& text) {
 		m_network->sendMessage(text);
 	});
-
-	m_audio    = Client::get()->getAudioHandler();
-	m_listener = m_audio->getListener();
-
-	// play background music
-	auto handle = m_audio->loadMP3("core:background_music1",
-	                               "Assets/Audio/background_music.mp3");
-
-	audio::Source backMusic((*m_audio)[handle]);
-	backMusic.enableLoop(true);
-
-	// background music shouldn't be spatial.
-	backMusic.enableSpatial(false);
-
-	backMusic.setGain(0.1f);
-
-	Client::get()->getAudioPool()->queue(backMusic);
 
 	Settings::get()->registerAPI(m_modManager);
 	InputMap::get()->registerAPI(m_modManager);
@@ -113,126 +96,6 @@ Game::Game(gfx::Window* window, entt::registry* registry, bool networked)
 	m_modManager->registerFunction("core.log_debug", [](std::string message) {
 		LOG_DEBUG("MODULE") << message;
 	});
-
-	m_modManager->registerFunction(
-	    "audio.loadMP3",
-	    [=](const std::string& uniqueName, const std::string& filePath) {
-		    return Client::get()->getAudioHandler()->loadMP3(uniqueName,
-		                                                     filePath);
-	    });
-
-	m_modManager->registerFunction("audio.play", [=](sol::table source) {
-		audio::Source audioSource;
-
-		// set which piece of audio is being played.
-		sol::optional<std::string> isString = source["id"];
-		if (isString)
-		{
-			audioSource.setAudioData(
-			    (*Client::get()->getAudioHandler())[*isString]);
-		}
-		else
-		{
-			sol::optional<unsigned int> isInt = source["id"];
-			if (isInt)
-			{
-				audioSource.setAudioData(
-				    (*Client::get()->getAudioHandler())[*isInt]);
-			}
-		}
-
-		// set if the audio is spatial (no idea what the default is, we should
-		// find out).
-		sol::optional<bool> isBool = source["spatial"];
-		if (isBool)
-		{
-			audioSource.enableSpatial(*isBool);
-		}
-		else
-		{
-			audioSource.enableSpatial(true);
-		}
-
-		// set position.
-		if (source["position"])
-		{
-			float x = source["position"]["x"];
-			float y = source["position"]["y"];
-			float z = source["position"]["z"];
-
-			audioSource.setPos({x, y, z});
-		}
-
-		// set direction, if nothing, don't do anything since openal is
-		// omnidirectional by default.
-		if (source["direction"])
-		{
-			sol::optional<float> doesXExist = source["direction"]["x"];
-			if (doesXExist)
-			{
-				float x = source.get_or(std::tie("direction", "x"), 0.f);
-				float y = source.get_or(std::tie("direction", "y"), 0.f);
-				float z = source.get_or(std::tie("direction", "z"), 0.f);
-				audioSource.setDirection({x, y, z});
-			}
-			else
-			{
-				sol::optional<std::string> isWorldDirection =
-				    source["direction"];
-
-				if (isWorldDirection)
-				{
-					if (*isWorldDirection == "north")
-					{
-						audioSource.setDirection({0.f, 0.f, -1.f});
-					}
-					if (*isWorldDirection == "south")
-					{
-						audioSource.setDirection({0.f, 0.f, 1.f});
-					}
-					if (*isWorldDirection == "east")
-					{
-						audioSource.setDirection({1.f, 0.f, 0.f});
-					}
-					if (*isWorldDirection == "west")
-					{
-						audioSource.setDirection({-1.f, 0.f, 0.f});
-					}
-					if (*isWorldDirection == "up")
-					{
-						audioSource.setDirection({0.f, 1.f, 0.f});
-					}
-					if (*isWorldDirection == "down")
-					{
-						audioSource.setDirection({0.f, -1.f, 0.f});
-					}
-				}
-			}
-		}
-
-		// set the gain, 1.0 by default.
-		sol::optional<float> isFloat = source["gain"];
-		if (isBool)
-		{
-			audioSource.setGain(*isFloat);
-		}
-
-		// set the pitch, 1.0 by default.
-		sol::optional<float> isFloatPitch = source["pitch"];
-		if (isFloatPitch)
-		{
-			audioSource.setPitch(*isFloatPitch);
-		}
-
-		// set looping status, disabled by default.
-		sol::optional<bool> isLooped = source["loop"];
-		if (isLooped)
-		{
-			audioSource.enableLoop(*isLooped);
-		}
-
-		Client::get()->getAudioPool()->queue(audioSource);
-	});
 }
 
 Game::~Game() { delete m_chat; }
@@ -247,12 +110,22 @@ void Game::onAttach()
 	ActorSystem::setBlockReferrer(&m_blockRegistry.referrer);
 	m_player = ActorSystem::registerActor(m_registry);
 
-	float progress = 0.f;
-	auto  result   = m_modManager->load(&progress);
-
-	if (!result.ok)
+	m_modManager->setup(m_save->getModList(), {"Modules"});
+	bool result = m_modManager->validate();
+	if (!result)
 	{
-		LOG_FATAL("MODDING") << "An error has occurred.";
+		LOG_FATAL("MODDING")
+		    << "An error occured while validating the modlist.";
+		LOG_FATAL("MODDING") << m_modManager->getError();
+		exit(EXIT_FAILURE);
+	}
+	
+	float progress = 0.f;
+	result   = m_modManager->load(&progress);
+	if (!result)
+	{
+		LOG_FATAL("MODDING") << "An error occured while loading mods.";
+		LOG_FATAL("MODDING") << m_modManager->getError();
 		exit(EXIT_FAILURE);
 	}
 
@@ -450,9 +323,6 @@ void Game::tick(float dt)
 	{
 		m_prevPos = position.position;
 	}
-
-	m_listener->setPosition(position.position);
-	m_listener->setVelocity({0, 0, 0});
 
 	m_renderPipeline.activate();
 	m_renderPipeline.setMatrix("u_view", m_camera->calculateViewMatrix());

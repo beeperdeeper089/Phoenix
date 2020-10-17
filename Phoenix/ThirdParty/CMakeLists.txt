@@ -6,16 +6,9 @@ set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
 # turn off the JSON tests
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
-# turn off OpenAL-Soft tests/utilities
-set(ALSOFT_UTILS OFF)
-set(ALSOFT_NO_CONFIG_UTIL ON)
-set(ALSOFT_EXAMPLES OFF)
-set(ALSOFT_TESTS OFF)
-
 # turn off the EnTT tests.
 set(BUILD_TESTING OFF)
 
-add_subdirectory (openal-soft)
 add_subdirectory (SDL2)
 
 add_subdirectory (Glad)
@@ -36,8 +29,7 @@ add_subdirectory (json)
 set_target_properties(SDL2main SDL2-static uninstall
 	Glad ImGui
 	lua liblua
-	enet aob build_version
-	OpenAL common
+	enet aob
 	PROPERTIES FOLDER Dependencies)
 
 # utility thing to make phoenix cmake tidier
@@ -68,7 +60,6 @@ set(PHX_THIRD_PARTY_LIBRARIES
 	sol2
 	liblua
 	nlohmann_json::nlohmann_json
-	OpenAL
 	$<$<PLATFORM_ID:Windows>:opengl32.lib> # link to opengl32.lib if windows.
 	$<$<PLATFORM_ID:Windows>:ws2_32.lib> # link to ws2_32.lib if windows.
 	$<$<PLATFORM_ID:Windows>:winmm.lib> # link to winmm.lib if windows.
