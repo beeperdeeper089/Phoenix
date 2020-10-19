@@ -26,136 +26,78 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Server/Server.hpp>
-
-#include <Common/Voxels/BlockReferrer.hpp>
-
 #include <Common/Logger.hpp>
 #include <Common/Settings.hpp>
 
-#include <iostream>
-#include <thread>
+#include <Server/Server.hpp>
 
 using namespace phx::server;
-using namespace phx;
 
-Server::Server(const std::string& save)
-{
-    // use this as a placeholder until we have command line arguments.
-    // even if the list is empty, it can create/load a save as required.
-    // listing mods but loading an existing save will NOT load more mods, you
-    // must manually edit the JSON to load an another mod after initialization.
-    std::vector<std::string> commandLineModList = {"mod1", "mod2", "mod3"};
-	m_save = new Save(save, commandLineModList);
-	m_iris = new server::net::Iris(&m_registry);
-	m_game = new Game(&m_blockRegistry, &m_registry, m_iris, m_save);
-}
+void registerIntegralAPI(phx::cms::ModManager);
+void registerUnusedAPI(phx::cms::ModManager);
 
-void registerUnusedAPI(game::ModManager* manager)
-{
-	manager->registerFunction("core.input.registerInput",
-	                          [](std::string uniqueName,
-	                             std::string displayName,
-	                             std::string defaultKey) {});
-	manager->registerFunction("core.input.getInput", [](int input) {});
-	manager->registerFunction("core.input.getInputRef",
-	                          [](std::string uniqueName) {});
-	manager->registerFunction("core.input.registerCallback",
-	                          [](int input, sol::function f) {});
-	manager->registerFunction(
-	    "audio.loadMP3",
-	    [=](const std::string& uniqueName, const std::string& filePath) {});
-	manager->registerFunction("audio.play", [=](sol::table source) {});
-}
+Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
+    : m_arguments(cliArguments)
+{}
 
 void Server::run()
 {
-	std::cout << "Hello, Server!" << std::endl;
+	//// STARTUP ////
 
-	LoggerConfig config;
-	config.verbosity = LogVerbosity::DEBUG;
-	Logger::initialize(config);
+	// LOADING SETTINGS
 
-	Settings::get()->load("config.txt");
-
-	// Initialize the Modules //
-
-	m_modManager = new game::ModManager();
-
-	m_modManager->registerFunction("core.print", [=](const std::string& text) {
-		std::cout << text << "\n";
-	});
-
-	m_blockRegistry.registerAPI(m_modManager);
-	Settings::get()->registerAPI(m_modManager);
-	m_game->registerAPI(m_modManager);
-	registerUnusedAPI(m_modManager);
-
-	m_modManager->registerFunction("core.log_warning", [](std::string message) {
-		LOG_WARNING("MODULE") << message;
-	});
-	m_modManager->registerFunction("core.log_fatal", [](std::string message) {
-		LOG_FATAL("MODULE") << message;
-	});
-	m_modManager->registerFunction("core.log_info", [](std::string message) {
-		LOG_INFO("MODULE") << message;
-	});
-	m_modManager->registerFunction("core.log_debug", [](std::string message) {
-		LOG_DEBUG("MODULE") << message;
-	});
-
-	m_modManager->setup(m_save->getModList(), {"Modules"});
-
-	auto result = m_modManager->validate();
-	if (!result)
+	const auto configIterator = m_arguments.find("config");
+	if (configIterator == m_arguments.end())
 	{
-		LOG_FATAL("CMS") << "An error occurred during mod initialization.";
-		LOG_FATAL("CMS") << m_modManager->getError();
-		exit(EXIT_FAILURE);
+		configIterator->second = "Settings.json";
 	}
+
+	Settings::get()->load(configIterator->second);
+
+	// INITIALIZING LOGGER
 	
-	float progress = 0.f;
-	result         = m_modManager->load(&progress);
-	if (!result)
+	const auto* logVerb =
+	    Settings::get()->add("Log Verbosity", "core:log_verbosity",
+	                         static_cast<int>(LogVerbosity::INFO));
+
+	LoggerConfig logConfig;
+	logConfig.verbosity = static_cast<LogVerbosity>(logVerb->value());
+	Logger::initialize(logConfig);
+
+	// LOADING SAVE.
+	
+	const auto saveIterator = m_arguments.find("save");
+	if (saveIterator == m_arguments.end())
 	{
-		LOG_FATAL("CMS") << "An error has occurred loading modules.";
-		LOG_FATAL("CMS") << m_modManager->getError();
-		exit(EXIT_FAILURE);
+		LOG_INFO("SERVER") << "No save file specified, loading default World.";
+		saveIterator->second = "World";
 	}
 
-	// Modules Initialized //
-
-	// Fire up Threads //
-
-	std::thread t_iris(&server::net::Iris::run, m_iris);
-	std::thread t_game(&Game::run, m_game);
-
-	// Enter Main Loop //
-
-    m_running = true;
-	std::string input;
-	while (m_running)
+	const auto& saves = Save::listAllSaves();
+	if (std::find(saves.begin(), saves.end(), saveIterator->second) == saves.end())
 	{
-		/// @todo Replace simple loop with commander
-		std::cin >> input;
-		if (input == "q")
+		LOG_INFO("SERVER") << "Save does not exist, creating...";
+		
+		std::vector<std::string> modList;
+		const auto               modIterator = m_arguments.find("mods");
+		if (modIterator != m_arguments.end())
 		{
-			m_running = false;
-			m_iris->kill();
+			// @todo Not memory efficient, creating copies. Optimise.
+			std::stringstream modString(modIterator->second);
+			std::string       mod;
+			while (std::getline(modString, mod, ';'))
+			{
+				modList.emplace_back(mod);
+			}
 		}
+
+		m_save = new Save(saveIterator->second, modList);
+	}
+	else
+	{
+		LOG_INFO("SERVER") << "Loading existing save...";
+		m_save = new Save(saveIterator->second);
 	}
 
-	// Begin Shutdown //
-
-	t_iris.join();
-	t_game.join();
-	Settings::get()->save("config.txt");
-}
-
-Server::~Server()
-{
-	delete m_iris;
-	delete m_game;
-	delete m_modManager;
-	delete m_save;
+	// INITIALIZE NETWORKING.
 }
