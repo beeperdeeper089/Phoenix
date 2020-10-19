@@ -42,8 +42,12 @@ namespace phx::client
 	class Client : public events::IEventListener, public Singleton<Client>
 	{
 	public:
-		Client();
+		Client() = default;
 		~Client() = default;
+
+		void initialize(
+		    const std::unordered_map<std::string, std::string>&
+		        cliArguments);
 
 		void pushLayer(gfx::Layer* layer);
 		void popLayer(gfx::Layer* layer);
@@ -51,10 +55,12 @@ namespace phx::client
 
 		void onEvent(events::Event e) override;
 		void run();
-
+		
 	private:
-		gfx::Window     m_window;
-		gfx::LayerStack m_layerStack;
+		std::unordered_map<std::string, std::string> m_arguments;
+		
+		gfx::Window*     m_window;
+		gfx::LayerStack* m_layerStack;
 		
 		bool          m_debugOverlayActive = false;
 		DebugOverlay* m_debugOverlay       = nullptr;

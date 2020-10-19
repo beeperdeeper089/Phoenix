@@ -33,38 +33,46 @@
 #include <Common/Settings.hpp>
 
 using namespace phx::client;
-using namespace phx;
 
-Client::Client() : m_window("Phoenix Game!", 1280, 720), m_layerStack(&m_window)
+void Client::initialize(const std::unordered_map<std::string, std::string>& cliArguments)
 {
-	m_window.registerEventListener(this);
+	m_arguments = cliArguments;
+	
+	const auto configIterator = m_arguments.find("config");
+	if (configIterator == m_arguments.end())
+	{
+		configIterator->second = "Settings.json";
+	}
+
+	
 }
 
-void Client::pushLayer(gfx::Layer* layer)
-{
-	if (layer->isOverlay())
-	{
-		m_layerStack.pushOverlay(layer);
-	}
-	else
-	{
-		m_layerStack.pushLayer(layer);
-	}
-}
 
-void Client::popLayer(gfx::Layer* layer)
+void Client::pushLayer(phx::gfx::Layer* layer)
 {
 	if (layer->isOverlay())
 	{
-		m_layerStack.popOverlay(layer);
+		m_layerStack->pushOverlay(layer);
 	}
 	else
 	{
-		m_layerStack.popLayer(layer);
+		m_layerStack->pushLayer(layer);
 	}
 }
 
-void Client::onEvent(events::Event e)
+void Client::popLayer(phx::gfx::Layer* layer)
+{
+	if (layer->isOverlay())
+	{
+		m_layerStack->popOverlay(layer);
+	}
+	else
+	{
+		m_layerStack->popLayer(layer);
+	}
+}
+
+void Client::onEvent(phx::events::Event e)
 {
 	using namespace events;
 	switch (e.type)
@@ -79,11 +87,11 @@ void Client::onEvent(events::Event e)
 				if (m_debugOverlay == nullptr)
 					m_debugOverlay = new DebugOverlay();
 
-				m_layerStack.pushLayer(m_debugOverlay);
+				m_layerStack->pushLayer(m_debugOverlay);
 			}
 			else
 			{
-				m_layerStack.popLayer(m_debugOverlay);
+				m_layerStack->popLayer(m_debugOverlay);
 			}
 			// don't set this to handled so we can propagate this down the stack
 			// to enable debug overlays.
@@ -99,7 +107,7 @@ void Client::onEvent(events::Event e)
 
 	if (!e.handled)
 	{
-		m_layerStack.onEvent(e);
+		m_layerStack->onEvent(e);
 	}
 }
 
@@ -121,8 +129,8 @@ void Client::run()
 
 		m_window.startFrame();
 
-		if (!m_layerStack.empty())
-			m_layerStack.tick(dt);
+		if (!m_layerStack->empty())
+			m_layerStack->tick(dt);
 
 		m_window.endFrame();
 	}
