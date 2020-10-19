@@ -12,9 +12,8 @@ set(Headers
         ${currentDir}/InputQueue.hpp
 
         ${currentDir}/Client.hpp
-        ${currentDir}/SplashScreen.hpp
-        ${currentDir}/Crosshair.hpp
         ${currentDir}/Game.hpp
+        ${currentDir}/Crosshair.hpp
         ${currentDir}/EscapeMenu.hpp
         ${currentDir}/InputMap.hpp
         ${currentDir}/Network.hpp

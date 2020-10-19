@@ -46,6 +46,13 @@
 
 namespace phx::client
 {
+	struct GameOptions
+	{
+		bool networked = false;
+
+		net::Address address;
+	};
+	
 	/**
 	 * @brief The actual game class for the Client.
 	 *
@@ -54,18 +61,13 @@ namespace phx::client
 	 * ticking functions and manages all the layers, but this actually
 	 * renders the voxel world and everything related to it.
 	 *
-	 * The other layers such as SplashScreen are not actually the game, but
-	 * you know... just a SplashScreen - this is the main layer you actually
-	 * interact with and play on.
-	 *
 	 * @see Layer
 	 * @see LayerStack
 	 */
 	class Game : public gfx::Layer
 	{
 	public:
-		explicit Game(gfx::Window* window, entt::registry* registry,
-		              bool networked = false);
+		explicit Game(gfx::Window* window);
 		~Game() override;
 
 		void onAttach() override;

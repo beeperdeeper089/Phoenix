@@ -8,9 +8,8 @@ set(Sources
         ${currentDir}/InputQueue.cpp
 
         ${currentDir}/Client.cpp
-        ${currentDir}/SplashScreen.cpp
-        ${currentDir}/Crosshair.cpp
         ${currentDir}/Game.cpp
+        ${currentDir}/Crosshair.cpp
         ${currentDir}/EscapeMenu.cpp
         ${currentDir}/InputMap.cpp
         ${currentDir}/Network.cpp

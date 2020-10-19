@@ -28,7 +28,6 @@
 
 #include <Client/Client.hpp>
 #include <Client/Game.hpp>
-#include <Client/SplashScreen.hpp>
 
 #include <Common/Logger.hpp>
 #include <Common/Settings.hpp>
@@ -73,11 +72,7 @@ void Client::onEvent(events::Event e)
 	case EventType::KEY_PRESSED:
 		switch (e.keyboard.key)
 		{
-		case Keys::KEY_Q:
-			m_window.close();
-			e.handled = true;
-			break;
-		case Keys::KEY_P:
+		case Keys::KEY_F3:
 			m_debugOverlayActive = !m_debugOverlayActive;
 			if (m_debugOverlayActive)
 			{
@@ -98,14 +93,6 @@ void Client::onEvent(events::Event e)
 			break;
 		}
 		break;
-	case EventType::LAYER_DESTROYED:
-		if (std::string(e.layer) == "SplashScreen")
-		{
-			Game* game = new Game(&m_window, &m_registry);
-			m_layerStack.pushLayer(game);
-			e.handled = true;
-		}
-		break;
 	default:
 		break;
 	}
@@ -119,12 +106,10 @@ void Client::onEvent(events::Event e)
 void Client::run()
 {
 	Settings::get()->load("settings.txt");
-    LoggerConfig config;
+
+	LoggerConfig config;
     config.verbosity = LogVerbosity::DEBUG;
     Logger::initialize(config);
-
-	SplashScreen* splashScreen = new SplashScreen();
-	m_layerStack.pushLayer(splashScreen);
 
 	std::size_t last = SDL_GetPerformanceCounter();
 	while (m_window.isRunning())
