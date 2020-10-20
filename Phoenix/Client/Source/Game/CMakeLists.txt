@@ -7,6 +7,7 @@ set(Sources
         ${currentDir}/Overlays/EscapeMenu.cpp
         ${currentDir}/Overlays/GameTools.cpp
 
+	${currentDir}/MainMenu.cpp
 	${currentDir}/Game.cpp
 	${currentDir}/InputMap.cpp
 	${currentDir}/InputQueue.cpp

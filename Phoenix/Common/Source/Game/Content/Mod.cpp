@@ -33,7 +33,7 @@
 
 using namespace phx::game;
 
-Mod::Mod(const std::string& name, const std::string& folder)
+Mod::Mod(const std::string& name, const std::string& folder, bool warn)
     : m_name(name), m_path(folder)
 {
 	namespace fs = std::filesystem;
@@ -45,9 +45,12 @@ Mod::Mod(const std::string& name, const std::string& folder)
 		if (!fs::exists(modDir / "Init.lua"))
 		{
 			// Init.lua does not exist, not a valid mod.
-			LOG_FATAL("MODDING")
+			if (warn)
+			{
+			LOG_WARNING("MODDING")
 			    << "The mod: " << m_name << "at: " << m_path
 			    << " is invalid. It does not contain an Init.lua";
+			}
 
 			// nothing more should be done, return here.
 			return;
@@ -104,9 +107,12 @@ Mod::Mod(const std::string& name, const std::string& folder)
 	}
 	else
 	{
-		LOG_FATAL("MODDING")
-		    << "The mod: " << m_name
-		    << " was not found at the requested location: " << m_path;
+		if (warn)
+		{
+			LOG_WARNING("MODDING")
+			    << "The mod: " << m_name
+			    << " was not found at the requested location: " << m_path;
+		}
 
 		// nothing more should be done, return here.
 		return;

@@ -68,6 +68,29 @@ static int CustomExceptionHandler(lua_State* L, sol::optional<const std::excepti
 	return sol::stack::push(L, description);
 }
 
+ModManager::ModList ModManager::getAllInstalledMods(const ModList& paths)
+{
+	ModList installedMods;
+
+	namespace fs = std::filesystem;
+	for (auto& path : paths)
+	{
+		for (auto& mod : fs::directory_iterator(path))
+		{
+			if (mod.is_directory())
+			{
+				Mod check(mod.path().filename().string(), path, false);
+				if (check.valid())
+				{
+					installedMods.push_back(check.getName());
+				}
+			}
+		}
+	}
+
+	return installedMods;
+}
+
 ModManager::ModManager()
 {
 	m_state.open_libraries(sol::lib::base);

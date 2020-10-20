@@ -27,6 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <Client/Client.hpp>
+#include <Client/Game/MainMenu.hpp>
 #include <Client/Graphics/Tooling/Timer.hpp>
 
 #include <Common/Logger.hpp>
@@ -34,19 +35,24 @@
 
 using namespace phx::client;
 
-void Client::initialize(const std::unordered_map<std::string, std::string>& cliArguments)
+void Client::initialize(const std::unordered_map<std::string, std::vector<std::string>>& cliArguments)
 {
 	//// STARTUP ////
 
 	// LOADING SETTINGS
 
-	const auto configIterator = m_arguments.find("config");
+	m_arguments = cliArguments;
+	
+	auto configIterator = m_arguments.find("config");
 	if (configIterator == m_arguments.end())
 	{
-		configIterator->second = "Settings.json";
+		configIterator =
+		    m_arguments
+		        .emplace("config", std::vector<std::string>{"Settings.json"})
+		        .first;
 	}
 
-	Settings::get()->load(configIterator->second);
+	Settings::get()->load(configIterator->second[0]);
 
 	// INITIALIZING LOGGER
 
@@ -61,6 +67,8 @@ void Client::initialize(const std::unordered_map<std::string, std::string>& cliA
 	// INITIALIZE WINDOW
 	m_window = new phx::gfx::Window("Phoenix", 1280, 720);
 	m_window->registerEventListener(this);
+
+	m_layerStack = new phx::gfx::LayerStack(m_window);
 	
 	// READY TO RUN.
 }
@@ -69,7 +77,7 @@ void Client::teardown()
 {
 	// as long as initialize has been called and the config variable has been
 	// set, we shouldn't have an issue at all.
-	Settings::get()->save(m_arguments.at("config"));
+	Settings::get()->save(m_arguments.at("config")[0]);
 }
 
 void Client::pushLayer(phx::gfx::Layer* layer)
@@ -123,6 +131,9 @@ void Client::onEvent(phx::events::Event e)
 
 void Client::run()
 {
+	MainMenu* menu = new MainMenu(m_window, m_arguments);
+	m_layerStack->pushLayer(menu);
+	
 	phx::gfx::Timer timer;
 	while (m_window->isRunning())
 	{		

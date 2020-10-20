@@ -45,11 +45,7 @@
 using namespace phx::client;
 using namespace phx;
 
-Game::Game(gfx::Window* window)
-    : Layer("Game")
-{
-
-}
+Game::Game(gfx::Window* window) : Layer("Game"), m_window(window) {}
 
 Game::~Game() { delete m_chat; }
 
@@ -197,21 +193,21 @@ void Game::onEvent(events::Event& e)
 			e.handled = true;
 			break;
 		case events::Keys::KEY_P:
-			if (Client::get()->isDebugLayerActive())
-				if (m_gameDebug == nullptr)
-				{
-					m_gameDebug =
-					    new GameTools(&m_followCam, m_registry, m_player);
-					Client::get()->pushLayer(m_gameDebug);
-				}
-				else
-				{
-					Client::get()->pushLayer(m_gameDebug);
-				}
-			else
-			{
-				Client::get()->popLayer(m_gameDebug);
-			}
+			//if (Client::get()->isDebugLayerActive())
+			//	if (m_gameDebug == nullptr)
+			//	{
+			//		m_gameDebug =
+			//		    new GameTools(&m_followCam, m_registry, m_player);
+			//		Client::get()->pushLayer(m_gameDebug);
+			//	}
+			//	else
+			//	{
+			//		Client::get()->pushLayer(m_gameDebug);
+			//	}
+			//else
+			//{
+			//	Client::get()->popLayer(m_gameDebug);
+			//}
 			// don't set this to handled so we can propagate this down the
 			// stack to enable debug overlays.
 			// e.handled = true;

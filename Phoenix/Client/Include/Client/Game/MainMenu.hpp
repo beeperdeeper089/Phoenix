@@ -28,42 +28,35 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include <Client/Graphics/Window.hpp>
+#include <Client/Graphics/Layer.hpp>
 
-namespace phx::game
+#include <Common/Game/Content/ModManager.hpp>
+
+#include <memory>
+
+namespace phx::client
 {
-	class Mod
+	class MainMenu : public gfx::Layer
 	{
 	public:
-		struct Dependency
-		{
-			std::string name;
+		MainMenu(gfx::Window* window, std::unordered_map<std::string, std::vector<std::string>>& cliArguments);
+		~MainMenu();
 
-			bool optional = false;
-		};
+		void onAttach() override;
+		void onDetach() override;
+		void onEvent(events::Event& e) override;
 		
-	public:
-		Mod() = delete;
-
-		Mod(const std::string& name, const std::string& folder, bool warn = true);
-		~Mod() = default;
-
-		bool valid() const;
-
-		const std::string& getName() const;
-		const std::string& getPath() const;
-
-		const std::vector<Dependency>& getDependencies() const;
+		void tick(float dt) override;
 
 	private:
-		bool m_valid = false;
+		std::unordered_map<std::string, std::vector<std::string>>& m_arguments;
 		
-		std::string m_name;
+		gfx::Window* m_window = nullptr;
 
-		// does not include the path of the mod itself, just the path it is within.
-		std::string m_path;
+		std::unique_ptr<char> m_addressBuffer;
 
-		std::vector<Dependency> m_dependencies;
+		game::ModManager::ModList m_installedMods;
+		std::vector<std::string>  m_saves;
 	};
-}
+} // namespace phx::client

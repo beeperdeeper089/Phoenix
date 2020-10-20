@@ -45,7 +45,7 @@ namespace phx::client
 		~Client() = default;
 
 		void initialize(
-		    const std::unordered_map<std::string, std::string>&
+		    const std::unordered_map<std::string, std::vector<std::string>>&
 		        cliArguments);
 
 		void teardown();
@@ -57,7 +57,7 @@ namespace phx::client
 		void run();
 		
 	private:
-		std::unordered_map<std::string, std::string> m_arguments;
+		std::unordered_map<std::string, std::vector<std::string>> m_arguments;
 		
 		gfx::Window*     m_window;
 		gfx::LayerStack* m_layerStack;

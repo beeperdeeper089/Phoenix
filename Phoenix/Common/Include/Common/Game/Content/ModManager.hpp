@@ -51,6 +51,9 @@ namespace phx::game
 		using ModList = std::vector<std::string>;
 
 	public:
+		static ModList getAllInstalledMods(const ModList& paths);
+		
+	public:
 		ModManager();
 
 		void        setup(const ModList& mods, const ModList& paths);

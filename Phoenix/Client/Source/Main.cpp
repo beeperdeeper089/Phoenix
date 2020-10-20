@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	// just *work* right now, we should use a tested library or make one
 	// ourselves down the line.
 
-	std::unordered_map<std::string, std::string> cliArguments;
+	std::unordered_map<std::string, std::vector<std::string>> cliArguments;
 
 	// we start from 1 because argv[0] will be the command used to run the
 	// application. we iterate every 2 since you have the --command and the
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 				if (index + 1 < argc)
 				{
 					// lets put this value into the cliArguments.
-					cliArguments[key] = argv[index + 1];
+					cliArguments[key] = {argv[index + 1]};
 					index += 2;
 				}
 				else
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 				if (index + 1 < argc)
 				{
 					// lets put this value into the cliArguments.
-					cliArguments[key] = argv[index + 1];
+					cliArguments[key] = {argv[index + 1]};
 					index += 2;
 				}
 				else
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 				}
 
 				// this is hacky, but it works, fuck off.
-				std::string modList;
+				auto& modList = cliArguments[key];
 
 				// we expect at least 1 mod and this makes the math work, we
 				// have a fail safe if no mod exists.
@@ -148,14 +148,11 @@ int main(int argc, char** argv)
 						break;
 					}
 
-					// push to a semi-colon delimited list.
 					std::string mod = argv[index];
-					modList += mod + ";";
+					modList.push_back(mod);
 
 					++index;
 				}
-
-				cliArguments[key] = modList;
 			}
 			else if (key == "address")
 			{
@@ -181,7 +178,7 @@ int main(int argc, char** argv)
 			{
 				// just insert the key, just so the key acts as a flag (could
 				// help in testing).
-				cliArguments[key] = "";
+				cliArguments[key] = {};
 				index++;
 			}
 		}
