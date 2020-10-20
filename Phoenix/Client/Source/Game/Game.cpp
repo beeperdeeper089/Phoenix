@@ -35,8 +35,8 @@
 #include <Common/Game/Actor.hpp>
 #include <Common/Game/Commander.hpp>
 #include <Common/Game/Components/Position.hpp>
-#include <Common/Logger.hpp>
 #include <Common/Game/Movement.hpp>
+#include <Common/Logger.hpp>
 
 #include <Common/Game/PlayerView.hpp>
 #include <cmath>
@@ -45,57 +45,10 @@
 using namespace phx::client;
 using namespace phx;
 
-Game::Game(gfx::Window* window, entt::registry* registry, bool networked)
-    : Layer("Game"), m_registry(registry), m_window(window)
+Game::Game(gfx::Window* window)
+    : Layer("Game")
 {
-	if (networked)
-	{
-		m_network = new client::Network(phx::net::Address("127.0.0.1", 7777));
-		m_chat->setMessageCallback([this](const std::string& message)
-		{
-			m_network->sendMessage(message);
-		});
-	}
-	// else TODO enable this else when we get mod list from network
-	//{
-	auto saveToUse = "save1";
-	//}
 
-	// use this as a placeholder until we have command line arguments.
-	// even if the list is empty, it can create/load a save as required.
-	// listing mods but loading an existing save will NOT load more mods, you
-	// must manually edit the JSON to load an another mod after initialization.
-	std::vector<std::string> commandLineModList = {"mod1", "mod2", "mod3"};
-	m_save = new Save(saveToUse, commandLineModList);
-	
-	m_modManager = new game::ModManager();
-
-	m_blockRegistry.registerAPI(m_modManager);
-
-	m_modManager->registerFunction(
-	    "core.command.register",
-	    [](std::string command, std::string help, sol::function f) {});
-
-	m_modManager->registerFunction("core.print", [=](const std::string& text) {
-		m_network->sendMessage(text);
-	});
-
-	Settings::get()->registerAPI(m_modManager);
-	InputMap::get()->registerAPI(m_modManager);
-	CommandBook::get()->registerAPI(m_modManager);
-
-	m_modManager->registerFunction("core.log_warning", [](std::string message) {
-		LOG_WARNING("MODULE") << message;
-	});
-	m_modManager->registerFunction("core.log_fatal", [](std::string message) {
-		LOG_FATAL("MODULE") << message;
-	});
-	m_modManager->registerFunction("core.log_info", [](std::string message) {
-		LOG_INFO("MODULE") << message;
-	});
-	m_modManager->registerFunction("core.log_debug", [](std::string message) {
-		LOG_DEBUG("MODULE") << message;
-	});
 }
 
 Game::~Game() { delete m_chat; }
@@ -119,9 +72,9 @@ void Game::onAttach()
 		LOG_FATAL("MODDING") << m_modManager->getError();
 		exit(EXIT_FAILURE);
 	}
-	
+
 	float progress = 0.f;
-	result   = m_modManager->load(&progress);
+	result         = m_modManager->load(&progress);
 	if (!result)
 	{
 		LOG_FATAL("MODDING") << "An error occured while loading mods.";
@@ -132,7 +85,8 @@ void Game::onAttach()
 	LOG_INFO("MAIN") << "Registering world";
 	if (m_network != nullptr)
 	{
-		m_map = new voxels::Map(&m_network->chunkQueue, &m_blockRegistry.referrer);
+		m_map =
+		    new voxels::Map(&m_network->chunkQueue, &m_blockRegistry.referrer);
 	}
 	else
 	{
@@ -147,13 +101,12 @@ void Game::onAttach()
 	{
 		m_chat = new gfx::ChatBox(m_window, nullptr);
 	}
-	
+
 	m_registry->emplace<PlayerView>(m_player, m_map);
 	m_camera = new gfx::FPSCamera(m_window, m_registry);
 	m_camera->setActor(m_player);
 
-	m_registry->emplace<Hand>(
-	    m_player, m_blockRegistry.referrer.blocks.get(0));
+	m_registry->emplace<Hand>(m_player, m_blockRegistry.referrer.blocks.get(0));
 
 	LOG_INFO("MAIN") << "Prepare rendering";
 
@@ -177,11 +130,11 @@ void Game::onAttach()
 	m_escapeMenu = new EscapeMenu(m_window);
 	Client::get()->pushLayer(m_crosshair);
 
-	if (Client::get()->isDebugLayerActive())
-	{
-		m_gameDebug = new GameTools(&m_followCam, m_registry, m_player);
-		Client::get()->pushLayer(m_gameDebug);
-	}
+	//if (Client::get()->isDebugLayerActive())
+	//{
+	//	m_gameDebug = new GameTools(&m_followCam, m_registry, m_player);
+	//	Client::get()->pushLayer(m_gameDebug);
+	//}
 
 	m_inputQueue = new InputQueue(m_registry, m_player, m_camera);
 	if (m_network != nullptr)

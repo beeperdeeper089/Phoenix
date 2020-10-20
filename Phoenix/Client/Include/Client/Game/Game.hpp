@@ -32,13 +32,13 @@
 #include <Client/Game/Overlays/EscapeMenu.hpp>
 #include <Client/Game/Overlays/GameTools.hpp>
 
+#include <Client/Game/InputQueue.hpp>
 #include <Client/Graphics/Camera.hpp>
+#include <Client/Graphics/ChatBox.hpp>
 #include <Client/Graphics/ChunkRenderer.hpp>
 #include <Client/Graphics/Layer.hpp>
 #include <Client/Graphics/ShaderPipeline.hpp>
 #include <Client/Graphics/Window.hpp>
-#include <Client/Graphics/ChatBox.hpp>
-#include <Client/Game/InputQueue.hpp>
 #include <Client/Voxels/BlockRegistry.hpp>
 
 #include <Common/Game/Content/ModManager.hpp>
@@ -52,7 +52,7 @@ namespace phx::client
 
 		net::Address address;
 	};
-	
+
 	/**
 	 * @brief The actual game class for the Client.
 	 *
