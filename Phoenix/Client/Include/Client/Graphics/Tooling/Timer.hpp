@@ -26,55 +26,35 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Client/GameTools.hpp>
+#pragma once
 
-#include <Common/Game/Actor.hpp>
-#include <Common/Game/Position.hpp>
+#include <SDL.h>
 
-#include <imgui.h>
+#include <cstddef>
 
-using namespace phx::client;
-using namespace phx;
-
-GameTools::GameTools(bool* followCam, entt::registry* registry,
-                     entt::entity player)
-    : Overlay("GameTools"), m_followCam(followCam), m_registry(registry),
-      m_player(player)
+namespace phx::gfx
 {
-}
-
-void GameTools::onAttach()
-{
-	m_sensitivity        = Settings::get()->getSetting("camera:sensitivity");
-	m_currentSensitivity = m_sensitivity->value();
-}
-
-void GameTools::onDetach() {}
-
-void GameTools::onEvent(events::Event& e) {}
-
-void GameTools::tick(float dt)
-{
-	ImGui::Begin("Phoenix");
-	if (ImGui::CollapsingHeader("Game Tools"))
+	class Timer
 	{
-		ImGui::Checkbox("Follow Camera", m_followCam);
+	public:
+		Timer() { m_last = SDL_GetPerformanceCounter(); }
 
-		int i = m_currentSensitivity;
-		ImGui::SliderInt("cam sensitivity", &i, 0, 100);
-		if (i != m_currentSensitivity)
+		~Timer() = default;
+
+		// returns dt in seconds
+		float step()
 		{
-			m_currentSensitivity = i;
-			m_sensitivity->set(m_currentSensitivity);
+			const std::size_t now = SDL_GetPerformanceFrequency();
+			const float       dt  = static_cast<float>(now - m_last) /
+			                 static_cast<float>(SDL_GetPerformanceFrequency());
+
+			m_last = now;
+			
+			return dt;
 		}
 
-		ImGui::Text("X: %f\nY: %f\nZ: %f",
-		            m_registry->get<Position>(m_player).position.x,
-		            m_registry->get<Position>(m_player).position.y,
-		            m_registry->get<Position>(m_player).position.z);
+	private:
+		std::size_t m_last = 0;
+	};
+} // namespace phx::gfx
 
-		ImGui::Text("Block in hand: %s",
-		            m_registry->get<Hand>(m_player).hand->displayName.c_str());
-	}
-	ImGui::End();
-}

@@ -36,9 +36,22 @@ using namespace phx::server;
 void registerIntegralAPI(phx::cms::ModManager);
 void registerUnusedAPI(phx::cms::ModManager);
 
-Server::Server(const std::unordered_map<std::string, std::string>& cliArguments)
-    : m_arguments(cliArguments)
-{}
+void registerUnusedAPI(cms::ModManager* manager)
+{
+	manager->registerFunction("core.input.registerInput",
+	                          [](std::string uniqueName,
+	                             std::string displayName,
+	                             std::string defaultKey) {});
+	manager->registerFunction("core.input.getInput", [](int input) {});
+	manager->registerFunction("core.input.getInputRef",
+	                          [](std::string uniqueName) {});
+	manager->registerFunction("core.input.registerCallback",
+	                          [](int input, sol::function f) {});
+	manager->registerFunction(
+	    "audio.loadMP3",
+	    [=](const std::string& uniqueName, const std::string& filePath) {});
+	manager->registerFunction("audio.play", [=](sol::table source) {});
+}
 
 void Server::run()
 {
@@ -54,23 +67,36 @@ void Server::run()
 
 	Settings::get()->load(configIterator->second);
 
-	// INITIALIZING LOGGER
-	
-	const auto* logVerb =
-	    Settings::get()->add("Log Verbosity", "core:log_verbosity",
-	                         static_cast<int>(LogVerbosity::INFO));
+	m_modManager = new cms::ModManager(m_save->getModList(), {"Modules"});
+
+	m_modManager->registerFunction("core.print", [=](const std::string& text) {
+		std::cout << text << "\n";
+	});
 
 	LoggerConfig logConfig;
 	logConfig.verbosity = static_cast<LogVerbosity>(logVerb->value());
 	Logger::initialize(logConfig);
 
-	// LOADING SAVE.
-	
-	const auto saveIterator = m_arguments.find("save");
-	if (saveIterator == m_arguments.end())
+	m_modManager->registerFunction("core.log_warning", [](std::string message) {
+		LOG_WARNING("MODULE") << message;
+	});
+	m_modManager->registerFunction("core.log_fatal", [](std::string message) {
+		LOG_FATAL("MODULE") << message;
+	});
+	m_modManager->registerFunction("core.log_info", [](std::string message) {
+		LOG_INFO("MODULE") << message;
+	});
+	m_modManager->registerFunction("core.log_debug", [](std::string message) {
+		LOG_DEBUG("MODULE") << message;
+	});
+
+	float progress = 0.f;
+	auto  result   = m_modManager->load(&progress);
+
+	if (!result.ok)
 	{
-		LOG_INFO("SERVER") << "No save file specified, loading default World.";
-		saveIterator->second = "World";
+		LOG_FATAL("CMS") << "An error has occurred loading modules.";
+		exit(EXIT_FAILURE);
 	}
 
 	const auto& saves = Save::listAllSaves();

@@ -28,10 +28,9 @@
 
 #pragma once
 
-#include <Client/DebugOverlay.hpp>
-#include <Client/Events/IEventListener.hpp>
-#include <Client/Graphics/LayerStack.hpp>
 #include <Client/Graphics/Window.hpp>
+#include <Client/Graphics/LayerStack.hpp>
+#include <Client/Events/IEventListener.hpp>
 
 #include <Common/Singleton.hpp>
 
@@ -49,9 +48,10 @@ namespace phx::client
 		    const std::unordered_map<std::string, std::string>&
 		        cliArguments);
 
+		void teardown();
+
 		void pushLayer(gfx::Layer* layer);
 		void popLayer(gfx::Layer* layer);
-		bool isDebugLayerActive() const { return m_debugOverlayActive; }
 
 		void onEvent(events::Event e) override;
 		void run();
@@ -61,9 +61,6 @@ namespace phx::client
 		
 		gfx::Window*     m_window;
 		gfx::LayerStack* m_layerStack;
-		
-		bool          m_debugOverlayActive = false;
-		DebugOverlay* m_debugOverlay       = nullptr;
 	};
 } // namespace phx::client
 

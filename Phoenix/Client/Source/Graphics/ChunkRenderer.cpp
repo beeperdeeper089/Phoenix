@@ -28,7 +28,7 @@
 
 #include <Client/Graphics/ChunkMesher.hpp>
 #include <Client/Graphics/ChunkRenderer.hpp>
-#include <Client/Graphics/OpenGLTools.hpp>
+#include <Client/Graphics/Tooling/OpenGLTools.hpp>
 
 #include <Common/Game/Actor.hpp>
 #include <Common/Game/PlayerView.hpp>

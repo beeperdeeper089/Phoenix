@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <Client/Client.hpp>
-#include <Client/Game.hpp>
+#include <Client/Game/Game.hpp>
 
 #include <Common/Game/Content/ModManager.hpp>
 #include <Common/Utility/Serializer.hpp>

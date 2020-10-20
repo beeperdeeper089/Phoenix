@@ -29,8 +29,8 @@
 #pragma once
 
 #include <Client/Graphics/Camera.hpp>
-#include <Client/InputMap.hpp>
-#include <Client/Network.hpp>
+#include <Client/Game/InputMap.hpp>
+#include <Client/Game/Network.hpp>
 
 #include <Common/Utility/BlockingQueue.hpp>
 

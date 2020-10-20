@@ -26,7 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Client/Network.hpp>
+#include <Client/Game/Network.hpp>
 
 #include <Common/Logger.hpp>
 #include <Common/Voxels/Chunk.hpp>

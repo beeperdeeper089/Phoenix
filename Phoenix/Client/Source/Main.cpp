@@ -199,7 +199,9 @@ int main(int argc, char** argv)
 		}
 	}
 	
+	client::Client::get()->initialize(cliArguments);
 	client::Client::get()->run();
+	client::Client::get()->teardown();
 
 	return 0;
 }

@@ -26,69 +26,64 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Client/DebugOverlay.hpp>
+#include <Client/Client.hpp>
+#include <Client/Game/Overlays/EscapeMenu.hpp>
 
-#include <Client/Graphics/ImGuiExtensions.hpp>
 #include <imgui.h>
-
-#include <glad/glad.h>
 
 using namespace phx::client;
 using namespace phx;
 
-DebugOverlay::DebugOverlay() : Overlay("DebugOverlay")
+EscapeMenu::EscapeMenu(gfx::Window* window)
+    : gfx::Overlay("EscapeMenu"), m_window(window)
 {
-	SDL_DisplayMode current;
-
-	for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i)
-	{
-		if (SDL_GetCurrentDisplayMode(i, &current) == 0)
-		{
-			if (current.refresh_rate > m_maxSampleRate)
-				m_maxSampleRate = current.refresh_rate;
-		}
-	}
+	const math::vec2 size = window->getSize();
+	m_windowCentre         = {size.x / 2, size.y / 2};
 }
 
-void DebugOverlay::onAttach() {}
-
-void DebugOverlay::onDetach() {}
-
-void DebugOverlay::onEvent(events::Event& e) {}
-
-void DebugOverlay::tick(float dt)
+EscapeMenu::~EscapeMenu()
 {
-	ImGui::Begin("Phoenix");
-
-	if (ImGui::CollapsingHeader("Graphics Information"))
-	{
-		if (ImGui::Checkbox("Wireframe", &m_wireframe))
-		{
-			if (m_wireframe)
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			else
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
-
-		ImGui::Text("Frame Time: %.2f ms/frame\n", dt * 1000.f);
-		ImGui::Text("FPS: %d\n", static_cast<int>(1.f / dt));
-
-		ImGui::SliderInt("Debug Sample Rate", &m_sampleRate, 1, 60);
-		ImGui::Checkbox("Pause Debug Graph", &m_pauseSampling);
-
-		if (m_time % m_sampleRate == 0 && !m_pauseSampling)
-		{
-			ImGui::PlotVariable("Frame Time: ", dt * 1000.f);
-		}
-		else
-		{
-			ImGui::PlotVariable("Frame Time: ", FLT_MAX);
-		}
-	}
-	ImGui::End();
-
-	++m_time;
-	if (m_time >= 3600)
-		m_time = 0;
+	// delete them just in case onDetach is never called.
+	delete m_button;
+	delete m_container;
 }
 
+void EscapeMenu::onEvent(events::Event& e)
+{
+	if (e.type == events::EventType::WINDOW_RESIZED)
+	{
+		m_windowCentre = {e.size.width / 2, e.size.height / 2};
+		// dont set handled because we want this to propagate down, this event
+		// isn't being handled, we're just using the data for our own help.
+	}
+
+	m_container->onEvent(e);
+}
+
+void EscapeMenu::onAttach()
+{
+	m_container =
+	    new gui::Container("", {50, 50}, {30, 30}, {0, 0, 0}, 1.f, m_window);
+
+	m_button = new gui::Button(m_container, {50, 50}, {90, 100},
+	                           {128, 128, 128}, 1.f);
+
+	m_button->setCallback([this](const events::Event& e)
+	{
+		if (e.mouse.button == events::MouseButtons::LEFT)
+		{
+			m_window->close();
+		}
+	});
+}
+
+void EscapeMenu::onDetach()
+{
+	delete m_button;
+	m_button = nullptr;
+
+	delete m_container;
+	m_container = nullptr;
+}
+
+void EscapeMenu::tick(float dt) { m_container->tick(dt); }

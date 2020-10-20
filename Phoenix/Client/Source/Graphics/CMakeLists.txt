@@ -1,8 +1,6 @@
-add_subdirectory(GUI)
-
 set(currentDir ${CMAKE_CURRENT_LIST_DIR})
-set(graphicsSources
-	${guiSources}
+set(Sources
+	${Sources}
 
 	${currentDir}/Window.cpp
 	${currentDir}/LayerStack.cpp

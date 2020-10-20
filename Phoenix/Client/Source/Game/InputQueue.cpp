@@ -26,7 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Client/InputQueue.hpp>
+#include <Client/Game/InputQueue.hpp>
 
 #include <Common/Game/Components/Position.hpp>
 

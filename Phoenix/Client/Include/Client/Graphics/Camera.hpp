@@ -37,7 +37,7 @@
 
 #include <Client/Graphics/Window.hpp>
 
-#include <Client/InputMap.hpp>
+#include <Client/Game/InputMap.hpp>
 
 #include <Common/Math/Math.hpp>
 #include <Common/Settings.hpp>

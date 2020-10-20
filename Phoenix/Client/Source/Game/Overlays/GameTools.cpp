@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Genten Studios
+// Copyright 2019-20 Genten Studios
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -26,56 +26,55 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Client/Graphics/GUI/Button.hpp>
+#include <Client/Game/Overlays/GameTools.hpp>
 
-using namespace phx::gui;
+#include <Common/Game/Actor.hpp>
+#include <Common/Game/Position.hpp>
 
-Button::Button(Container* container, phx::math::vec2 pos, phx::math::vec2 size,
-               phx::math::vec3 color, float alpha)
-    : IComponent(container), m_pos(pos), m_size(size),
-      m_rectangle(container, pos, size, color, alpha, true)
+#include <imgui.h>
+
+using namespace phx::client;
+using namespace phx;
+
+GameTools::GameTools(bool* followCam, entt::registry* registry,
+                     entt::entity player)
+    : Overlay("GameTools"), m_followCam(followCam), m_registry(registry),
+      m_player(player)
 {
-	// we are putting rectangle in the initializer list since we don't really
-	// want to heap allocate it for memory locality and because there is no
-	// default constructor for it.
-
-	container->attachComponent(this);
 }
 
-Button::~Button() { container->detachComponent(this); }
-
-void Button::setCallback(const Callback& callback) { m_callback = callback; }
-
-phx::math::vec2 Button::getPosition() const { return m_pos; }
-
-void Button::setPosition(const phx::math::vec2& position)
+void GameTools::onAttach()
 {
-	m_pos = position;
-	m_rectangle.setPosition(position);
+	m_sensitivity        = Settings::get()->getSetting("camera:sensitivity");
+	m_currentSensitivity = m_sensitivity->value();
 }
 
-phx::math::vec2 Button::getSize() const { return m_size; }
+void GameTools::onDetach() {}
 
-void Button::setSize(const phx::math::vec2& size)
-{
-	m_size = size;
-	m_rectangle.setSize(size);
-}
+void GameTools::onEvent(events::Event& e) {}
 
-void Button::onEvent(phx::events::Event& event)
+void GameTools::tick(float dt)
 {
-	if (event.type == events::EventType::MOUSE_BUTTON_PRESSED)
+	ImGui::Begin("Phoenix");
+	if (ImGui::CollapsingHeader("Game Tools"))
 	{
-		if (m_rectangle.isPointInObject({event.mouse.x, event.mouse.y}))
+		ImGui::Checkbox("Follow Camera", m_followCam);
+
+		int i = m_currentSensitivity;
+		ImGui::SliderInt("cam sensitivity", &i, 0, 100);
+		if (i != m_currentSensitivity)
 		{
-			if (m_callback)
-			{
-				m_callback(event);
-			}
-
-			event.handled = true;
+			m_currentSensitivity = i;
+			m_sensitivity->set(m_currentSensitivity);
 		}
-	}
-}
 
-void Button::tick(float dt) { m_rectangle.tick(dt); }
+		ImGui::Text("X: %f\nY: %f\nZ: %f",
+		            m_registry->get<Position>(m_player).position.x,
+		            m_registry->get<Position>(m_player).position.y,
+		            m_registry->get<Position>(m_player).position.z);
+
+		ImGui::Text("Block in hand: %s",
+		            m_registry->get<Hand>(m_player).hand->displayName.c_str());
+	}
+	ImGui::End();
+}

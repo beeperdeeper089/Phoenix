@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <Client/Client.hpp>
-#include <Client/Game.hpp>
+#include <Client/Graphics/Tooling/Timer.hpp>
 
 #include <Common/Logger.hpp>
 #include <Common/Settings.hpp>
@@ -36,17 +36,41 @@ using namespace phx::client;
 
 void Client::initialize(const std::unordered_map<std::string, std::string>& cliArguments)
 {
-	m_arguments = cliArguments;
-	
+	//// STARTUP ////
+
+	// LOADING SETTINGS
+
 	const auto configIterator = m_arguments.find("config");
 	if (configIterator == m_arguments.end())
 	{
 		configIterator->second = "Settings.json";
 	}
 
+	Settings::get()->load(configIterator->second);
+
+	// INITIALIZING LOGGER
+
+	const auto* logVerb =
+	    Settings::get()->add("Log Verbosity", "core.log_verbosity",
+	                         static_cast<int>(LogVerbosity::INFO));
+
+	LoggerConfig logConfig;
+	logConfig.verbosity = static_cast<LogVerbosity>(logVerb->value());
+	Logger::initialize(logConfig);
+
+	// INITIALIZE WINDOW
+	m_window = new phx::gfx::Window("Phoenix", 1280, 720);
+	m_window->registerEventListener(this);
 	
+	// READY TO RUN.
 }
 
+void Client::teardown()
+{
+	// as long as initialize has been called and the config variable has been
+	// set, we shouldn't have an issue at all.
+	Settings::get()->save(m_arguments.at("config"));
+}
 
 void Client::pushLayer(phx::gfx::Layer* layer)
 {
@@ -81,21 +105,7 @@ void Client::onEvent(phx::events::Event e)
 		switch (e.keyboard.key)
 		{
 		case Keys::KEY_F3:
-			m_debugOverlayActive = !m_debugOverlayActive;
-			if (m_debugOverlayActive)
-			{
-				if (m_debugOverlay == nullptr)
-					m_debugOverlay = new DebugOverlay();
-
-				m_layerStack->pushLayer(m_debugOverlay);
-			}
-			else
-			{
-				m_layerStack->popLayer(m_debugOverlay);
-			}
-			// don't set this to handled so we can propagate this down the stack
-			// to enable debug overlays.
-			// e.handled = true;
+			// enable debug overlay.
 			break;
 		default:
 			break;
@@ -113,27 +123,14 @@ void Client::onEvent(phx::events::Event e)
 
 void Client::run()
 {
-	Settings::get()->load("settings.txt");
-
-	LoggerConfig config;
-    config.verbosity = LogVerbosity::DEBUG;
-    Logger::initialize(config);
-
-	std::size_t last = SDL_GetPerformanceCounter();
-	while (m_window.isRunning())
-	{
-		const std::size_t now = SDL_GetPerformanceCounter();
-		const float       dt  = static_cast<float>(now - last) /
-		                 static_cast<float>(SDL_GetPerformanceFrequency());
-		last = now;
-
-		m_window.startFrame();
+	phx::gfx::Timer timer;
+	while (m_window->isRunning())
+	{		
+		m_window->startFrame();
 
 		if (!m_layerStack->empty())
-			m_layerStack->tick(dt);
+			m_layerStack->tick(timer.step());
 
-		m_window.endFrame();
+		m_window->endFrame();
 	}
-
-	Settings::get()->save("settings.txt");
 }
