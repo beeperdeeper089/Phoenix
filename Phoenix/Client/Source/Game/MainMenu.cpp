@@ -39,8 +39,8 @@ MainMenu::MainMenu(gfx::Window*                                  window,
                    std::unordered_map<std::string, std::vector<std::string>>& cliArguments)
     : Layer("MainMenu"), m_arguments(cliArguments), m_window(window)
 {
-	m_addressBuffer = std::make_unique<char>(255);
-	strcpy(m_addressBuffer.get(), "127.0.0.1");
+	m_addressBuffer = "127.0.0.1";
+	m_addressBuffer.resize(255);
 
 	auto pathIterator = m_arguments.find("paths");
 	if (pathIterator == m_arguments.end())
@@ -70,7 +70,7 @@ void MainMenu::tick(float dt)
 	{
 		ImGui::Text("Address:");
 		ImGui::SameLine();
-		ImGui::InputText("", m_addressBuffer.get(), 255);
+		ImGui::InputText("", &m_addressBuffer[0], m_addressBuffer.size());
 		ImGui::SameLine();
 
 		if (ImGui::Button("Connect"))
@@ -93,11 +93,18 @@ void MainMenu::tick(float dt)
 		{
 			ImGui::Text("No mods found.");
 		}
-		
+
+		if (ImGui::Button("Refresh"))
+		{
+			m_installedMods = game::ModManager::getAllInstalledMods(m_arguments["paths"]);
+		}
 	}
 	ImGui::End();
 
-	ImGui::Begin("Saves");
+	// -50 for padding.
+	ImGui::SetNextWindowSize(
+	    {m_window->getSize().x / 4, m_window->getSize().y / 2 - 50});
+	ImGui::Begin("Saves", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 	{
 		if (!m_saves.empty())
 		{
@@ -109,6 +116,14 @@ void MainMenu::tick(float dt)
 		else
 		{
 			ImGui::Text("No existing saves found.");
+		}
+
+		ImGui::Indent(ImGui::GetWindowContentRegionWidth() - 60.f);
+		ImGui::SetCursorPos(
+		    {ImGui::GetCursorPos().x, ImGui::GetWindowSize().y - 20.f - ImGui::GetStyle().FramePadding.y});
+		if (ImGui::Button("Refresh", {60, 20}))
+		{
+			m_saves = Save::listAllSaves();
 		}
 		
 	}

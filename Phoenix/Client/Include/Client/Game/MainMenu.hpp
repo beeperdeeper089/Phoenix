@@ -54,7 +54,7 @@ namespace phx::client
 		
 		gfx::Window* m_window = nullptr;
 
-		std::unique_ptr<char> m_addressBuffer;
+		std::string m_addressBuffer;
 
 		game::ModManager::ModList m_installedMods;
 		std::vector<std::string>  m_saves;
