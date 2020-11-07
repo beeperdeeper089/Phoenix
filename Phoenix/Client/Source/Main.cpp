@@ -27,16 +27,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <Client/Client.hpp>
-#include <Client/Graphics/ShaderPipeline.hpp>
-#include <Client/Graphics/TexturePacker.hpp>
-#include <Client/Graphics/Window.hpp>
-
-#include <Common/Logger.hpp>
-
-#include <glad/glad.h>
-
-#include <filesystem>
-namespace fs = std::filesystem;
 
 using namespace phx;
 

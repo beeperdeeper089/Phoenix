@@ -28,24 +28,68 @@
 
 #pragma once
 
-#include <Common/Math/Math.hpp>
+#include <Common/Save.hpp>
+#include <Common/Utility/BlockingQueue.hpp>
+#include <Common/Voxels/BlockReferrer.hpp>
 #include <Common/Voxels/Chunk.hpp>
-#include <map>
+
+#include <unordered_map>
 
 namespace phx::voxels
 {
+	struct MapEvent
+	{
+		// only one event for now, but to streamline things in the future if we
+		// don't need to update a whole chunk, this will become much more
+		// useful.
+		enum Event
+		{
+			CHUNK_UPDATE
+		};
+
+		Event      type;
+		voxels::Chunk* chunk;
+	};
+
+	class MapEventSubscriber
+	{
+	public:
+		virtual void onMapEvent(const MapEvent& mapEvent) = 0;
+	};
+
 	class Map
 	{
 	public:
-		Map(std::string save, std::string name);
+		Map(Save* save, const std::string& name,
+		    voxels::BlockReferrer* referrer);
+		Map(BlockingQueue<std::pair<math::vec3, std::vector<std::byte>>>* queue,
+		    voxels::BlockReferrer* referrer);
 
-		Chunk getChunk(math::vec3 pos);
-		void  setBlockAt(math::vec3 pos, BlockType* block);
-		void  save(math::vec3 pos);
+		Chunk* getChunk(const math::vec3& pos);
+		static std::pair<math::vec3, math::vec3> getBlockPos(
+		    math::vec3 position);
+		BlockType* getBlockAt(math::vec3 position);
+		void       setBlockAt(math::vec3 pos, BlockType* block);
+		void       save(const math::vec3& pos);
+
+		void registerEventSubscriber(MapEventSubscriber* subscriber);
 
 	private:
-		std::map<math::vec3, Chunk, math::Vector3Key> m_chunks;
-		std::string                                   m_save;
-		std::string                                   m_mapName;
+		void dispatchToSubscriber(const MapEvent& mapEvent) const;
+		
+	private:
+		std::unordered_map<math::vec3, Chunk, math::Vector3Hasher,
+		                   math::Vector3KeyComparator>
+		    m_chunks;
+
+		BlockReferrer* m_referrer;
+
+		Save*       m_save = nullptr;
+		std::string m_mapName;
+
+		BlockingQueue<std::pair<math::vec3, std::vector<std::byte>>>* m_queue =
+		    nullptr;
+
+		std::vector<MapEventSubscriber*> m_subscribers;
 	};
 } // namespace phx::voxels

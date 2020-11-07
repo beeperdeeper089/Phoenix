@@ -26,60 +26,20 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <Common/Voxels/BlockRegistry.hpp>
 #include <Common/Voxels/Chunk.hpp>
-#include <iostream>
 
 using namespace phx::voxels;
-using namespace phx;
 
-Chunk::Chunk(math::vec3 chunkPos) : m_pos(chunkPos)
+Chunk::Chunk(const phx::math::vec3& chunkPos, BlockReferrer* referrer)
+    : m_pos(chunkPos), m_referrer(referrer)
 {
 	m_blocks.reserve(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 }
 
-Chunk::Chunk(math::vec3 chunkPos, const std::string& save) : m_pos(chunkPos)
-{
-	std::string_view search = save;
-	size_t           pos;
-	while ((pos = search.find_first_of(';')) != std::string_view::npos)
-	{
-		std::string result;
-		result = search.substr(0, pos);
-		m_blocks.push_back(BlockRegistry::get()->getFromID(result));
-		search.remove_prefix(pos + 1);
-	}
-}
+phx::math::vec3   Chunk::getChunkPos() const { return m_pos; }
+Chunk::BlockList& Chunk::getBlocks() { return m_blocks; }
 
-std::string Chunk::save()
-{
-	std::string save;
-	for (BlockType* block : m_blocks)
-	{
-		save += block->id;
-		save += ";";
-	}
-	return save;
-}
-
-void Chunk::autoTestFill()
-{
-	BlockType* block = BlockRegistry::get()->getFromID("core.air");
-	if (m_pos.y < 16 && m_pos.y >= 0.f)
-	{
-		block = BlockRegistry::get()->getFromID("core.grass");
-	}
-
-	for (std::size_t i = 0; i < CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH; ++i)
-	{
-		m_blocks.push_back(block);
-	}
-}
-
-math::vec3               Chunk::getChunkPos() const { return m_pos; }
-std::vector<BlockType*>& Chunk::getBlocks() { return m_blocks; }
-
-BlockType* Chunk::getBlockAt(math::vec3 position) const
+BlockType* Chunk::getBlockAt(phx::math::vec3 position) const
 {
 	if (position.x < CHUNK_WIDTH && position.y < CHUNK_HEIGHT &&
 	    position.z < CHUNK_DEPTH)
@@ -87,11 +47,10 @@ BlockType* Chunk::getBlockAt(math::vec3 position) const
 		return m_blocks[getVectorIndex(position)];
 	}
 
-	return BlockRegistry::get()->getFromRegistryID(
-	    1); // 1 is always out of bounds
+	return m_referrer->blocks.get(BlockType::OUT_OF_BOUNDS_BLOCK);
 }
 
-void Chunk::setBlockAt(math::vec3 position, BlockType* newBlock)
+void Chunk::setBlockAt(phx::math::vec3 position, BlockType* newBlock)
 {
 	if (position.x < CHUNK_WIDTH && position.y < CHUNK_HEIGHT &&
 	    position.z < CHUNK_DEPTH)
@@ -100,3 +59,29 @@ void Chunk::setBlockAt(math::vec3 position, BlockType* newBlock)
 	}
 }
 
+phx::Serializer& Chunk::operator>>(phx::Serializer& ser) const
+{
+	ser << m_pos.x << m_pos.y << m_pos.z;
+	for (const BlockType* block : m_blocks)
+	{
+		ser << block->uniqueIdentifier;
+	}
+
+	return ser;
+}
+
+phx::Serializer& Chunk::operator<<(phx::Serializer& ser)
+{
+	m_blocks.clear();
+	m_blocks.reserve(4096);
+
+	ser >> m_pos.x >> m_pos.y >> m_pos.z;
+	for (int i = 0; i < CHUNK_DEPTH * CHUNK_WIDTH * CHUNK_HEIGHT; i++)
+	{
+		std::size_t id = 0;
+		ser >> id;
+		m_blocks.push_back(m_referrer->blocks.get(id));
+	}
+
+	return ser;
+}

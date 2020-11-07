@@ -28,27 +28,22 @@
 
 #include <Client/GameTools.hpp>
 
-#include <Common/Position.hpp>
 #include <Common/Actor.hpp>
+#include <Common/Position.hpp>
 
 #include <imgui.h>
 
 using namespace phx::client;
 using namespace phx;
 
-GameTools::GameTools(bool* followCam, int* playerHand, Player* player, entt::registry* registry)
-    : Overlay("GameTools"), m_registry(registry)
+GameTools::GameTools(bool* followCam, entt::registry* registry,
+                     entt::entity player)
+    : Overlay("GameTools"), m_followCam(followCam), m_registry(registry),
+      m_player(player)
 {
-	m_followCam  = followCam;
-	m_playerHand = playerHand;
-	m_player     = player;
 }
 
-void GameTools::onAttach()
-{
-	m_sensitivity        = Settings::get()->getSetting("camera:sensitivity");
-	m_currentSensitivity = m_sensitivity->value();
-}
+void GameTools::onAttach() {}
 
 void GameTools::onDetach() {}
 
@@ -61,22 +56,13 @@ void GameTools::tick(float dt)
 	{
 		ImGui::Checkbox("Follow Camera", m_followCam);
 
-		int i = m_currentSensitivity;
-		ImGui::SliderInt("cam sensitivity", &i, 0, 100);
-		if (i != m_currentSensitivity)
-		{
-			m_currentSensitivity = i;
-			m_sensitivity->set(m_currentSensitivity);
-		}
-
 		ImGui::Text("X: %f\nY: %f\nZ: %f",
-		            m_registry->get<Position>(m_player->getEntity()).position.x,
-                    m_registry->get<Position>(m_player->getEntity()).position.y,
-                    m_registry->get<Position>(m_player->getEntity()).position.z);
+		            m_registry->get<Position>(m_player).position.x,
+		            m_registry->get<Position>(m_player).position.y,
+		            m_registry->get<Position>(m_player).position.z);
 
-		ImGui::Text("Block in hand: %i: %s", *m_playerHand,
-                    m_registry->get<Hand>(m_player->getEntity()).hand->displayName.c_str());
+		ImGui::Text("Block in hand: %s",
+		            m_registry->get<Hand>(m_player).hand->displayName.c_str());
 	}
 	ImGui::End();
 }
-

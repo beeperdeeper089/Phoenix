@@ -31,7 +31,10 @@
 #include <Common/CoreIntrinsics.hpp>
 #include <Common/Math/Math.hpp>
 #include <Common/Voxels/Block.hpp>
+#include <Common/Voxels/BlockReferrer.hpp>
+#include <Common/Registry.hpp>
 
+#include <Common/Utility/Serializer.hpp>
 #include <vector>
 
 namespace phx::voxels
@@ -74,28 +77,20 @@ namespace phx::voxels
 	 * //renderer->dropChunk(chunk.getChunkPos());
 	 * @endcode
 	 */
-	class Chunk
+	class Chunk : public ISerializable
 	{
+	public:
+		using BlockList = std::vector<BlockType*>;
+		
 	public:
 		Chunk() = delete;
 
-		explicit Chunk(math::vec3 chunkPos);
+		Chunk(const math::vec3& chunkPos, BlockReferrer* referrer);
 		~Chunk()                  = default;
 		Chunk(const Chunk& other) = default;
 		Chunk& operator=(const Chunk& other) = default;
 		Chunk(Chunk&& other) noexcept        = default;
 		Chunk& operator=(Chunk&& other) noexcept = default;
-
-		Chunk(math::vec3 chunkPos, const std::string& save);
-
-		std::string save();
-
-		/**
-		 * @brief Quick function to create solid chunks of grass.
-		 *
-		 * @todo Replace this with MapGen
-		 */
-		void autoTestFill();
 
 		/**
 		 * @brief Get the position of the chunk.
@@ -108,7 +103,7 @@ namespace phx::voxels
 		 * @return std::vector<BlockType*>& Vector of pointers to all the
 		 * blocks in the chunk.
 		 */
-		std::vector<BlockType*>& getBlocks();
+		BlockList& getBlocks();
 
 		/**
 		 * @brief Gets the Block at the supplied position.
@@ -132,6 +127,10 @@ namespace phx::voxels
 
 		/// @brief How deep a chunk is (z axis).
 		static constexpr int CHUNK_DEPTH = 16;
+
+		/// @brief The amount of blocks in a chunk.
+		static constexpr int CHUNK_MAX_BLOCKS =
+		    CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH;
 
 		/**
 		 * @brief Get the Index based coordinates in a chunk.
@@ -164,10 +163,16 @@ namespace phx::voxels
 			                      static_cast<std::size_t>(pos.z));
 		}
 
+		// serialize.
+		Serializer& operator>>(Serializer& ser) const override;
+
+		// unserialize.
+		Serializer& operator<<(Serializer& ser) override;
+
 	private:
-		/// @brief The position of the chunk in relation to the map.
-		math::vec3              m_pos;
-		std::vector<BlockType*> m_blocks;
+		math::vec3 m_pos;
+		BlockList m_blocks;
+
+		BlockReferrer* m_referrer;
 	};
 } // namespace phx::voxels
-
