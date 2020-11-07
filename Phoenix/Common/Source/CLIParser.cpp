@@ -1,4 +1,4 @@
-// Copyright 2019-20 Genten Studios
+// Copyright 2020 Genten Studios
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -26,44 +26,33 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-/**
- * @file ChunkMesher.hpp
- * @brief The mesher class for use with chunks.
- *
- * @copyright Copyright (c) 2019-20 Genten Studios
- */
+#include <Common/CLIParser.hpp>
 
-#pragma once
+using namespace phx;
 
-#include <Client/Graphics/TexturePacker.hpp>
-#include <Client/Graphics/ChunkRenderer.hpp>
-#include <Client/Voxels/BlockRegistry.hpp>
-
-#include <Common/Voxels/Chunk.hpp>
-
-#include <vector>
-
-namespace phx::gfx
+CLIParser::CLIParser()
 {
-	/**
-	 * @brief Meshes a chunk.
-	 *
-	 * This mesher does not understand "smart"/"greedy" meshing, it will mesh
-	 * only this chunk, and will not take neighbor chunks into account as of
-	 * yet. As the project gains maturity and we have more features, this will
-	 * be improved.
-	 *
-	 * @paragraph Usage
-	 * @code
-	 * auto mesh = ChunkMesher::mesh(chunk, renderer->getTextureTable(),
-	 * blockRegistry);
-	 * @endcode
-	 *
-	 */
-	class ChunkMesher
-	{
-	public:
-		static std::vector<float> mesh(voxels::Chunk*         chunk,
-		                               client::BlockRegistry* blockRegistry);
-	};
-} // namespace phx::gfx
+}
+
+CLIParser::~CLIParser()
+{
+}
+
+void CLIParser::addParameter(const CLIParameter& parameter)
+{
+}
+
+std::vector<CLIParameter*> CLIParser::getParameterList() const
+{
+	return {nullptr};
+}
+
+void CLIParser::parse(int argc, char** argv)
+{
+}
+
+std::vector<std::string>* CLIParser::getArgument(
+	const std::string& parameter) const
+{
+	return nullptr;
+}

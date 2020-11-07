@@ -17,6 +17,7 @@ set(Sources
 	${currentDir}/Input.cpp
 	${currentDir}/Save.cpp
 	${currentDir}/PlayerView.cpp
+	${currentDir}/CLIParser.cpp
 
 	PARENT_SCOPE
 )

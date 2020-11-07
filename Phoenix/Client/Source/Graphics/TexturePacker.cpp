@@ -294,7 +294,7 @@ void TexturePacker::pack()
 	// flip all images vertically on load, otherwise everything loads upside
 	// down and i'm not bothering changing the UV system :(
 	stbi_set_flip_vertically_on_load(true);
-	
+
 	std::size_t layer = 0;
 	for (auto& size : textures)
 	{
@@ -336,11 +336,11 @@ void TexturePacker::pack()
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, posX, posY,
 					                static_cast<int>(layer),
 					                static_cast<int>(size.first),
-					                static_cast<int>(size.first), 1,
-					                GL_RGBA, GL_UNSIGNED_BYTE, image);
+					                static_cast<int>(size.first), 1, GL_RGBA,
+					                GL_UNSIGNED_BYTE, image);
 
 					stbi_image_free(image);
-					
+
 					// clang format makes this look like a rats arse.
 					// clang-format off
 					m_loadedTexData.insert({
@@ -363,11 +363,14 @@ void TexturePacker::pack()
 
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	LOG_INFO("TEXTURING") << "A total of " << layersNeeded
-	                      << " layers will be used.";
+	// this is shit, we need a proper way to setup texture filtering, but we can
+	// implement this in the future.
+	float aniso = 0.0f;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso); 
 
 	// @todo Manually generate mipmaps.
 
