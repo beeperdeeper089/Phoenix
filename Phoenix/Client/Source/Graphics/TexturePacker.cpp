@@ -70,7 +70,7 @@ TexturePacker::Handle TexturePacker::add(const std::string& path)
 	}
 
 	// if the element already exists, return the position of it.
-	return std::distance(m_texturesToLoad.begin(), it);
+	return std::distance(m_texturesToLoad.begin(), it) + 1;
 }
 
 const TextureData* TexturePacker::getData(Handle handle) const
@@ -340,7 +340,7 @@ void TexturePacker::pack()
 					                GL_UNSIGNED_BYTE, image);
 
 					stbi_image_free(image);
-
+					
 					// clang format makes this look like a rats arse.
 					// clang-format off
 					m_loadedTexData.insert({
