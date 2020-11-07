@@ -70,6 +70,9 @@ TexturePacker::Handle TexturePacker::add(const std::string& path)
 	}
 
 	// if the element already exists, return the position of it.
+	// we HAVE to add 1 because we have an existing handle of 0 on
+	// initialization that is just empty data to provide a fallback on textures
+	// not existing.
 	return std::distance(m_texturesToLoad.begin(), it) + 1;
 }
 
