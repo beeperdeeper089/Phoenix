@@ -46,12 +46,12 @@ namespace phx
 		// you can do --help full_name_of_parameter to get just this message.
 		std::string helpString;
 
-		// try not to make any parameters required, but the feature's here.
-		bool required = false;
 		// read multiple values for this, otherwise ignore and error if there are multiple parameters.
 		bool multiValue = false;
 		// if this is a flag, it will not have any values, it will just exist.
 		bool isFlag     = false;
+		// if this is false, don't register a shorthand value for this.
+		bool enableShorthand = false;
 	};
 
 	/**
@@ -63,25 +63,44 @@ namespace phx
 	 * @paragraph Terminology
 	 *     Parameter: The actual name/details of the flag used on the command line.
 	 *     Argument: The actual value given and parsed.
+	 *
+	 * @paragraph Usage
+	 *     CLIParameter param {"saves", "s", "this is a help message", false,
+	 *							false, true};
+	 *	   CLIParser parser;
+	 *	   parser.addParameter(param);
+	 *
+	 *	   parser.parse(argc, argv);
+	 *
+	 *	   auto arg = parser.getArgument("saves");
+	 *	   if (arg != nullptr)
+	 *	   {
+	 *         std::cout << (*arg)[0] << std::endl;
+	 *	   }
+	 *	   else
+	 *	   {
+	 *         std::cout << "Argument was not supplied." << std::endl;
+	 *     }
 	 */
 	class CLIParser
 	{
 	public:
-		CLIParser();
-		~CLIParser();
+		CLIParser() = default;
+		~CLIParser() = default;
 
 		void addParameter(const CLIParameter& parameter);
-		std::vector<CLIParameter*> getParameterList() const;
 
-		void parse(int argc, char** argv);
+		bool parse(int argc, char** argv);
+		std::string getHelpString() const;
 
-		std::vector<std::string>* getArgument(
+		// you must use the full parameter name when using this.
+		std::vector<std::string> const* getArgument(
 		    const std::string& parameter) const;
 
 	private:
 		std::vector<CLIParameter>                    m_parameters;
 		std::unordered_map<std::string, std::size_t> m_fullParamMap;
 		std::unordered_map<std::string, std::size_t> m_shorthandMap;
-		std::unordered_map<std::string, std::vector<std::string>> m_arguments;
+		std::unordered_map<std::size_t, std::vector<std::string>> m_arguments;
 	};
 }

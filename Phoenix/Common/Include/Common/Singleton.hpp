@@ -40,4 +40,4 @@ namespace phx
 			return &instance;
 		}
 	};
-} // namespace q2
+} // namespace phx

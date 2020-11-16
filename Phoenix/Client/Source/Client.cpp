@@ -127,8 +127,8 @@ void Client::run()
 	m_audio = new audio::Audio();
 	m_audioPool = new audio::SourcePool();
 
-	SplashScreen* splashScreen = new SplashScreen();
-	m_layerStack.pushLayer(splashScreen);
+	Game* game = new Game(&m_window, &m_registry);
+	m_layerStack.pushLayer(game);
 
 	std::size_t last = SDL_GetPerformanceCounter();
 	while (m_window.isRunning())
