@@ -1,12 +1,11 @@
 add_subdirectory(Events)
 add_subdirectory(Graphics)
 add_subdirectory(Voxels)
+add_subdirectory(GameState)
 
 set(currentDir ${CMAKE_CURRENT_LIST_DIR})
 set(Headers
-        ${eventHeaders}
-        ${graphicsHeaders}
-        ${voxelHeaders}
+        ${Headers}
 
         ${currentDir}/InputQueue.hpp
 
