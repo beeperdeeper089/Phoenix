@@ -28,32 +28,13 @@
 
 #pragma once
 
-#include <Client/GameState/Timestep.hpp>
-#include <Client/GameState/GameState.hpp>
-#include <Client/Renderer/Window.hpp>
-
-#include <entt/entt.hpp>
-
-namespace phx::client
+namespace phx::render
 {
-	class GameStateManager : public events::IEventListener
+	class RenderPipeline
 	{
 	public:
-		GameStateManager(render::Window* window, entt::registry* registry);
-		~GameStateManager();
-
-		void pushState(GameState* state);
-		void popState();
-
-		GameState* getCurrentState();
-
-		void onEvent(events::Event& e) override;
-		void run();
-
-	private:
-		render::Window* m_window;
-		entt::registry* m_registry;
-
-		std::vector<GameState*> m_states;
+		RenderPipeline();
+		~RenderPipeline();
+		
 	};
 }

@@ -30,13 +30,13 @@
 
 namespace phx::client
 {
-	class SimpleTimer
+	class Timestep
 	{
 	public:
-		SimpleTimer();
+		Timestep();
 
-		SimpleTimer& tick();
-		void         clear();
+		Timestep& step();
+		void      clear();
 
 		// will return seconds.
 		operator float() const { return m_time; }
@@ -58,7 +58,7 @@ namespace phx::client
 	public:
 		FixedTimestep(float timestep);
 
-		FixedTimestep& tick();
+		FixedTimestep& step();
 		void           clear();
 
 		bool shouldStep();

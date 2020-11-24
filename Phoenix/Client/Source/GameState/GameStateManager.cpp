@@ -26,34 +26,70 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <Client/GameState/GameStateManager.hpp>
 
-#include <Client/GameState/Timestep.hpp>
-#include <Client/GameState/GameState.hpp>
-#include <Client/Renderer/Window.hpp>
+using namespace phx::client;
 
-#include <entt/entt.hpp>
-
-namespace phx::client
+GameStateManager::GameStateManager(render::Window* window,
+                                   entt::registry* registry)
+    : m_window(window), m_registry(registry)
 {
-	class GameStateManager : public events::IEventListener
+}
+
+GameStateManager::~GameStateManager()
+{
+	while (!m_states.empty())
+		popState();
+}
+
+void GameStateManager::pushState(GameState* state)
+{
+	m_states.push_back(state);
+}
+
+void GameStateManager::popState()
+{
+	if (!m_states.empty())
 	{
-	public:
-		GameStateManager(render::Window* window, entt::registry* registry);
-		~GameStateManager();
+		delete m_states.back();
+		m_states.pop_back();
+	}
+}
 
-		void pushState(GameState* state);
-		void popState();
+GameState* GameStateManager::getCurrentState()
+{
+	if (m_states.empty())
+	{
+		return nullptr;
+	}
 
-		GameState* getCurrentState();
+	return m_states.back();
+}
 
-		void onEvent(events::Event& e) override;
-		void run();
+void GameStateManager::onEvent(events::Event& e)
+{
+	if (getCurrentState())
+	{
+		getCurrentState()->onEvent(e);
+	}
+}
 
-	private:
-		render::Window* m_window;
-		entt::registry* m_registry;
+void GameStateManager::run()
+{
+	Timestep timer;
 
-		std::vector<GameState*> m_states;
-	};
+	while (m_window->isRunning())
+	{
+		GameState* currentState = nullptr;
+
+		if ((currentState = getCurrentState()) == nullptr)
+		{
+			continue;
+		}
+
+		currentState->onUpdate(timer.step());
+		currentState->render();
+
+		m_window->swapBuffers();
+	}
 }

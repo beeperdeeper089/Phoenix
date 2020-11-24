@@ -132,6 +132,31 @@ namespace phx::math::detail
 			return (x <= rhs.x && y <= rhs.y);
 		}
 
+		bool operator==(const T& scalar) const
+		{
+			return (x == scalar && y ==scalar);
+		}
+		bool operator!=(const T& scalar) const
+		{
+			return (x != scalar && y !=scalar);
+		}
+		bool operator>(const T& scalar) const
+		{
+			return (x > scalar && y > scalar);
+		}
+		bool operator<(const T& scalar) const
+		{
+			return (x < scalar && y < scalar);
+		}
+		bool operator>=(const T& scalar) const
+		{
+			return (x >= scalar && y >=scalar);
+		}
+		bool operator<=(const T& scalar) const
+		{
+			return (x <= scalar && y <=scalar);
+		}
+
 		Vector2 operator+(const Vector2& rhs)
 		{
 			return Vector2(x + rhs.x, y + rhs.y);

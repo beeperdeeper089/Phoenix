@@ -2,8 +2,8 @@ set(currentDir ${CMAKE_CURRENT_LIST_DIR})
 set(Sources
         ${Sources}
 
-        ${currentDir}/Timestep.cpp
-        ${currentDir}/GameStateManager.cpp
+        ${currentDir}/InputState.cpp
+        ${currentDir}/Window.cpp
 
         PARENT_SCOPE
         )

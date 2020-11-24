@@ -29,31 +29,27 @@
 #pragma once
 
 #include <Client/GameState/Timestep.hpp>
-#include <Client/GameState/GameState.hpp>
-#include <Client/Renderer/Window.hpp>
 
-#include <entt/entt.hpp>
+#include <string>
 
-namespace phx::client
+namespace phx::render
 {
-	class GameStateManager : public events::IEventListener
+	class RenderStage
 	{
 	public:
-		GameStateManager(render::Window* window, entt::registry* registry);
-		~GameStateManager();
+		RenderStage(const std::string& name) : m_name(name) {}
+		virtual ~RenderStage();
 
-		void pushState(GameState* state);
-		void popState();
+		// don't need this method - but it allows the RenderStage to maybe apply
+		// interpolation or update buffers as necessary when it makes sense.
+		void onUpdate(const client::Timestep& dt);
 
-		GameState* getCurrentState();
+		// this method should literally just call whatever's necessary for rendering.
+		// obviously can play around with framebuffers/renderbuffers/etc...
+		// shouldn't really do any "data processing" though.
+		void render();
 
-		void onEvent(events::Event& e) override;
-		void run();
-
-	private:
-		render::Window* m_window;
-		entt::registry* m_registry;
-
-		std::vector<GameState*> m_states;
+	protected:
+		std::string m_name;
 	};
-}
+} // namespace phx::client

@@ -38,7 +38,8 @@ namespace phx::events
 		IEventListener()          = default;
 		virtual ~IEventListener() = default;
 
-		virtual void onEvent(Event e) = 0;
+		virtual void onEvent(Event e) {} // don't force this implementation.
+		virtual void onEvent(Event& e) {} // don't force this implementation.
 	};
 } // namespace phx::events
 

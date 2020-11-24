@@ -26,34 +26,54 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <Client/Renderer/InputState.hpp>
 
-#include <Client/GameState/Timestep.hpp>
-#include <Client/GameState/GameState.hpp>
-#include <Client/Renderer/Window.hpp>
+#include <SDL.h>
 
-#include <entt/entt.hpp>
+using namespace phx::render;
 
-namespace phx::client
+bool InputState::getKeyState(const events::Keys& key) const
 {
-	class GameStateManager : public events::IEventListener
-	{
-	public:
-		GameStateManager(render::Window* window, entt::registry* registry);
-		~GameStateManager();
+	return SDL_GetKeyboardState(nullptr)[static_cast<SDL_Scancode>(key)];
+}
 
-		void pushState(GameState* state);
-		void popState();
+bool InputState::getModstate(const events::Mods& key) const
+{
+	return SDL_GetModState() | static_cast<SDL_Keymod>(key);
+}
 
-		GameState* getCurrentState();
+bool InputState::getMouseState(const events::MouseButtons& button) const
+{
+	return SDL_GetMouseState(nullptr, nullptr) &
+	       SDL_BUTTON(static_cast<int>(button));
+}
 
-		void onEvent(events::Event& e) override;
-		void run();
+bool InputState::getWindowFocusState() const
+{
+	// https://stackoverflow.com/a/24930075 <- we use INPUT_FOCUS since it
+	// checks if window is active.
+	return SDL_GetWindowFlags(m_window) & SDL_WINDOW_INPUT_FOCUS;
+}
 
-	private:
-		render::Window* m_window;
-		entt::registry* m_registry;
+void InputState::hideCursor() { SDL_ShowCursor(SDL_DISABLE); }
 
-		std::vector<GameState*> m_states;
-	};
+void InputState::showCursor() { SDL_ShowCursor(SDL_ENABLE); }
+
+bool InputState::isCursorHidden() const { return SDL_ShowCursor(SDL_QUERY); }
+
+phx::math::vec2 InputState::getCursorPosition() const
+{
+	int x, y;
+	SDL_GetMouseState(&x, &y);
+	return {x, y};
+}
+
+void InputState::setCursorPosition(const math::vec2& pos)
+{
+	SDL_WarpMouseInWindow(m_window, pos.x, pos.y);
+}
+
+void InputState::setMouseRelativeMode(bool enable)
+{
+	SDL_SetRelativeMouseMode(enable ? SDL_TRUE : SDL_FALSE);
 }

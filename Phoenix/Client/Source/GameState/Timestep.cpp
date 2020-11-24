@@ -32,23 +32,25 @@
 
 using namespace phx::client;
 
-SimpleTimer::SimpleTimer()
+Timestep::Timestep()
 {
 	m_last = static_cast<float>(SDL_GetPerformanceCounter());
 }
 
-SimpleTimer& SimpleTimer::tick()
+Timestep& Timestep::step()
 {
-	auto now = static_cast<float>(SDL_GetPerformanceCounter());
+	const auto now = static_cast<float>(SDL_GetPerformanceCounter());
 
 	// m_time is now delta time in SECONDS.
 	m_time = static_cast<float>(now - m_last) /
 	         static_cast<float>(SDL_GetPerformanceFrequency());
+
+	m_last = now;
 	
 	return *this;
 }
 
-void SimpleTimer::clear()
+void Timestep::clear()
 {
 	// this will just mean that if you call clear, you can essentially eliminate
 	// any lag.
@@ -61,15 +63,19 @@ FixedTimestep::FixedTimestep(float timestep) : m_timestep(timestep)
 	m_last = static_cast<float>(SDL_GetPerformanceCounter());
 }
 
-FixedTimestep& FixedTimestep::tick()
+FixedTimestep& FixedTimestep::step()
 {
-	float now = static_cast<float>(SDL_GetPerformanceCounter());
+	const float now = static_cast<float>(SDL_GetPerformanceCounter());
 
 	// m_time is delta time in seconds.
 	m_time = static_cast<float>(now - m_last) /
 	         static_cast<float>(SDL_GetPerformanceFrequency());
 
 	m_accumulator += m_time;
+
+	m_last = now;
+
+	return *this;
 }
 
 void FixedTimestep::clear()

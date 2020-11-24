@@ -28,32 +28,59 @@
 
 #pragma once
 
-#include <Client/GameState/Timestep.hpp>
-#include <Client/GameState/GameState.hpp>
-#include <Client/Renderer/Window.hpp>
+#include <Common/Math/Math.hpp>
 
-#include <entt/entt.hpp>
+#include <Client/Events/IEventListener.hpp>
+#include <Client/Renderer/InputState.hpp>
 
-namespace phx::client
+#include <string>
+
+namespace phx::render
 {
-	class GameStateManager : public events::IEventListener
+	class Window
 	{
 	public:
-		GameStateManager(render::Window* window, entt::registry* registry);
-		~GameStateManager();
+		Window(const std::string& title, const math::vec2& size, bool fullscreen);
+		~Window();
 
-		void pushState(GameState* state);
-		void popState();
+		const InputState* getInputState() const;
 
-		GameState* getCurrentState();
+		bool isRunning() const;
+		void close();
+		void swapBuffers();
+		void pollEvents();
+		void registerEventListener(events::IEventListener* listener);
+		void removeEventListener(events::IEventListener* listener);
 
-		void onEvent(events::Event& e) override;
-		void run();
+		void show();
+		void hide();
+		void maximise();
+		void minimise();
+		void focus();
+
+		std::string getTitle() const;
+		void        setTitle(const std::string& title);
+
+		bool isFullscreen() const;
+		void setFullscreen(bool enable);
+		
+		math::vec2 getSize() const;
+		void       resize(const math::vec2& size);
+		void       setResizable(bool enable);
+
+		bool isVsync() const;
+		void setVsync(bool enable) const;
 
 	private:
-		render::Window* m_window;
-		entt::registry* m_registry;
+		void dispatchToListeners(events::Event& event);
+		
+	private:
+		bool m_running;
+		
+		SDL_Window* m_window;
+		SDL_GLContext m_context;
 
-		std::vector<GameState*> m_states;
+		InputState m_inputState = {};
+		std::vector<events::IEventListener*> m_eventListeners;
 	};
-}
+} // namespace phx::client

@@ -28,18 +28,34 @@
 
 #pragma once
 
+#include <Client/GameState/Timestep.hpp>
+#include <Client/Events/Event.hpp>
+
+#include <string>
+
 namespace phx::client
 {
+	class GameStateManager;
+	
 	class GameState
 	{
 	public:
-		void init();
-		void cleanup();
+		GameState(const std::string& stateName) : m_name(stateName) {}
+		virtual ~GameState() = default;
+		
+		virtual void onEnter() = 0;
+		virtual void onExit() = 0;
 
-		void pause();
-		void resume();
+		virtual void onEvent(events::Event& event) = 0;
+		virtual void onUpdate(const Timestep& dt) = 0;
 
-		void handleEvents();
-		void update(float dt);
+		virtual void render() = 0;
+
+	protected:
+		friend class GameStateManager;
+
+	protected:
+		GameStateManager* m_gameManager;
+		std::string       m_name;
 	};
 } // namespace phx::client

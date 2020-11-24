@@ -28,32 +28,41 @@
 
 #pragma once
 
-#include <Client/GameState/Timestep.hpp>
-#include <Client/GameState/GameState.hpp>
-#include <Client/Renderer/Window.hpp>
+#include <Common/Math/Math.hpp>
 
-#include <entt/entt.hpp>
+#include <Client/Events/Keys.hpp>
 
-namespace phx::client
+#include <SDL.h>
+
+namespace phx::render
 {
-	class GameStateManager : public events::IEventListener
+	class Window;
+	class InputState
 	{
 	public:
-		GameStateManager(render::Window* window, entt::registry* registry);
-		~GameStateManager();
+		InputState() = default;
+		~InputState() = default;
 
-		void pushState(GameState* state);
-		void popState();
+		bool       getKeyState(const events::Keys& key) const;
+		bool       getModstate(const events::Mods& key) const;
+		bool       getMouseState(const events::MouseButtons& button) const;
+		bool       getWindowFocusState() const;
 
-		GameState* getCurrentState();
+		void       hideCursor();
+		void       showCursor();
+		bool       isCursorHidden() const;
+		math::vec2 getCursorPosition() const;
+		void       setCursorPosition(const math::vec2& pos);
 
-		void onEvent(events::Event& e) override;
-		void run();
+		// setting this to true automatically hides the cursor and locks it to the window.
+		// use this where possible (things like camera.)
+		// things like UI work differently anyway so should be good.
+		void setMouseRelativeMode(bool enable);
 
 	private:
-		render::Window* m_window;
-		entt::registry* m_registry;
-
-		std::vector<GameState*> m_states;
+		friend class phx::render::Window;
+		
+	private:
+		SDL_Window* m_window;
 	};
-}
+} // namespace phx::render

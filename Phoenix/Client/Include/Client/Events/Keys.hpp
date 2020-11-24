@@ -34,14 +34,14 @@
 
 namespace phx::events
 {
-	enum class MouseButtons : int
+	enum class MouseButtons
 	{
 		LEFT   = SDL_BUTTON_LEFT,
-		RIGHT  = SDL_BUTTON_RIGHT,
 		MIDDLE = SDL_BUTTON_MIDDLE,
+		RIGHT  = SDL_BUTTON_RIGHT,
 	};
 
-	enum class Keys : int
+	enum class Keys
 	{
 		NONE              = 0,
 		KEY_SPACE         = SDL_SCANCODE_SPACE,
@@ -160,10 +160,10 @@ namespace phx::events
 		KEY_RIGHT_CONTROL = SDL_SCANCODE_RCTRL,
 		KEY_RIGHT_ALT     = SDL_SCANCODE_RALT,
 		KEY_RIGHT_SUPER   = SDL_SCANCODE_RGUI,
-		KEY_MENU          = SDL_SCANCODE_MENU
+		KEY_MENU          = SDL_SCANCODE_MENU,
 	};
 
-	enum class Mods : int
+	enum class Mods
 	{
 		MOD_NONE         = 0,           // no mod :(
 		MOD_LEFT_SHIFT   = KMOD_LSHIFT, // Left Shift
